@@ -1,7 +1,7 @@
 # RehabRally - Working ON
 Physiotherapy clinic management application.
 
-#plane to:
+#plan to:
 
 1)manage users (Patients) with Mvc Web App Like Create Account,Update,
 		and all about user management and Patient monitoring as assign tasks (Exercises in our case) 
