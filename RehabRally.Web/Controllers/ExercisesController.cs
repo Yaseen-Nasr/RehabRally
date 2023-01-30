@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +10,13 @@ using RehabRally.Web.Core.ViewModels;
 using RehabRally.Web.Data;
 using RehabRally.Web.Filters;
 using RehabRally.Web.Services;
+using System.Data;
 using System.Linq.Dynamic.Core;
 using System.Security.Principal;
 
 namespace RehabRally.Web.Controllers
 {
+    [Authorize(Roles = AppRoles.Doctor)]
     public class ExercisesController : Controller
     {
         private readonly IWebHostEnvironment _webHostEnvironment;

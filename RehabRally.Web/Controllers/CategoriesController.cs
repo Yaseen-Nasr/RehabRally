@@ -1,14 +1,18 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RehabRally.Web.Core.Consts;
 using RehabRally.Web.Core.Models;
 using RehabRally.Web.Core.ViewModels;
 using RehabRally.Web.Data;
 using RehabRally.Web.Filters;
+using System.Data;
 using System.Security.Claims;
 
 namespace RehabRally.Web.Controllers
 {
+    [Authorize(Roles = AppRoles.Doctor)]
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
