@@ -44,6 +44,7 @@ namespace RehabRally.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
+            
 
             var category = _mapper.Map<Category>(model);  
             _context.Add(category);

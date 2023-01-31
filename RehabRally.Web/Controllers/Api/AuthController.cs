@@ -15,8 +15,7 @@ using System.Text;
 namespace RehabRally.Web.Controllers.Api
 {
     [Route("api/[controller]")]
-    [ApiController]
-
+    [ApiController] 
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager; 
@@ -28,15 +27,14 @@ namespace RehabRally.Web.Controllers.Api
         public AuthController(UserManager<ApplicationUser> userManager,
                         IOptions<JWT> jwt,
                         RoleManager<IdentityRole> roleManager,
-                        IAuthService authService
-,
-                        IHttpContextAccessor httpContextAccessor)
+                        IAuthService authService 
+                   )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwt = jwt.Value;
             _authService = authService;
-            this.httpContextAccessor = httpContextAccessor;
+    
         }
 
         [HttpPost("LogIn")]
@@ -53,14 +51,13 @@ namespace RehabRally.Web.Controllers.Api
 
             return Ok(result);
         }   
-        [HttpGet("Domy")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-         public IActionResult Domy()
+        [HttpGet("domy")]
+        [Authorize(AuthenticationSchemes ="Bearer")]
+        public async Task<IActionResult> Domy()
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-             
-            return Ok(User.FindFirstValue("uid"));
-        }
+            Guid id =Guid.Parse(User.FindFirstValue("uid"));
+            return Ok(id);
+        }   
+       
      }
 }

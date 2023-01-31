@@ -13,8 +13,13 @@
             <div class="d-flex flex-wrap flex-sm-nowrap mb-6">
                 <!--begin::Image-->
                 <div class="d-flex flex-center flex-shrink-0 bg-light rounded w-100px h-100px w-lg-150px h-lg-150px me-7 mb-4">
-                    <a data-fslightbox href="@Model.ImageUrl">
-                        <img class="mw-50px mw-lg-75px" src="@Model.ImageThumbnailUrl" alt="@Model.Title" />
+                    <a  href=@(string.IsNullOrEmpty(Model.ImageUrl) ? Model.LinkImageUrl : Model.ImageUrl) >
+                        <img class="mw-50px mw-lg-75px" src="@(string.IsNullOrEmpty(Model.ImageUrl) ? Model.LinkImageUrl:Model.ImageUrl)" alt="@Model.Title" />
+                    </a>
+                </div>
+                <div class="d-flex flex-center flex-shrink-0 bg-light rounded w-100px h-100px w-lg-150px h-lg-150px me-7 mb-4">
+                    <a href=@(string.IsNullOrEmpty(Model.ImageUrl) ? Model.SecondaryImageUrl : Model.LinkImageUrl)>
+                        <img class="mw-50px mw-lg-75px" src="@(string.IsNullOrEmpty(Model.ImageUrl) ? Model.SecondaryImageUrl : Model.LinkImageUrl)" alt="@Model.Title" />
                     </a>
                 </div>
                 <!--end::Image-->
@@ -127,5 +132,6 @@
 @section Scripts
     {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/books-details.js" asp-append-version="true"></script>
+    <script src="~/js/exercises-details.js" asp-append-version="true"></script>
+  
 }

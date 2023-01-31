@@ -1,4 +1,5 @@
-﻿function onAddCopySuccess(row) {
+﻿
+function onAddCopySuccess(row) {
     showSuccessMessage();
     $('#Modal').modal('hide');
 
