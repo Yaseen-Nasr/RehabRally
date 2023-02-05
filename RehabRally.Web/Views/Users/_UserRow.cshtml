@@ -1,7 +1,11 @@
 ﻿@model UserViewModel
 
 <tr>
-    <td>@Model.FullName</td>
+    <td>
+        <a href="/Users/Details/@Model.Id" class="menu-link flex-stack px-3">
+            @Model.FullName
+        </a>
+        </td>
     <td>@Model.UserName</td>
     <td>@Model.Email</td>
     <td>

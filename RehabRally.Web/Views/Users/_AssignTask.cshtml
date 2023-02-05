@@ -1,0 +1,50 @@
+﻿@model AssignExerciseFormViewModel
+
+<form asp-action="Create" asp-controller="ManagePatient"
+      data-ajax-method="post"
+      data-ajax="true"
+      data-ajax-begin="onModalBegin"
+      data-ajax-success="@(Model?.Id > 0 ? "onEditCopySuccess" : "onAddCopySuccess")"
+      data-ajax-failure="showErrorMessage"
+      data-ajax-complete="onModalComplete">
+
+    <input type="hidden" asp-for="UserId" />
+    @if (Model?.Id > 0)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <select class="form-select form-select-solid js-select2" id="js-category" data-placeholder="Select Category" asp-for="CategoryId" asp-items="@Model.Categories">
+                <option value="">Select category</option>
+            </select>
+            <label asp-for="CategoryId"></label>
+        </div>
+        <span asp-validation-for="CategoryId" class="text-danger d-block"></span>
+    </div>
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <select class="form-select form-select-solid js-select2" id="js-exercises" data-placeholder="Select exercise" asp-for="ExerciseId" asp-items="@Model.Exercises">
+                <option value="">Select exercise</option>
+            </select>
+            <label asp-for="ExerciseId"></label>
+        </div>
+        <span asp-validation-for="ExerciseId" class="text-danger d-block"></span>
+    </div>
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="number" class="form-control form-control-solid form-control form-control-solid-solid" placeholder="Sets" asp-for="Sets" />
+            <label asp-for="Sets"></label>
+        </div>
+        <span asp-validation-for="Sets" class="text-danger d-block"></span>
+    </div>
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="number" class="form-control form-control-solid form-control form-control-solid-solid" placeholder="Repetions" asp-for="Repetions" />
+            <label asp-for="Repetions"></label>
+        </div>
+        <span asp-validation-for="Repetions" class="text-danger d-block"></span>
+    </div>
+    <partial name="_ModalFooter" />
+</form> 
+ 

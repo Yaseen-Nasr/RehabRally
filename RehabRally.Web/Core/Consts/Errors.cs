@@ -22,6 +22,8 @@
         public const string InvalidPhoneNumber = "Invalid phone number!";
         public const string InvalidNationalId = "Invalid National ID!";
         public const string EmptyImege = "Please select an Image";
-        public const string EmptyLinkImege = "Please insert Default Link image First!";
+        public const string InvalidLink = "Invalid Link";
+        public const string EmptyDefaultLinkImege = "Please insert Default Link image First!";
+        public const string EmptyPreviousLinkImege = "Please insert Previous Link image First!";
     }
 }

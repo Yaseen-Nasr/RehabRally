@@ -29,7 +29,7 @@
                         <i class="bi bi-pencil-fill fs-7"></i>
 
                         <!--begin::Inputs-->
-                        <input type="file" id="js-img-id" asp-for="Image" accept=".png, .jpg, .jpeg"/>
+                        <input type="file" id="js-img-id" asp-for="Image" accept=".png, .jpg, .jpeg" />
                         <input type="hidden" name="avatar_remove" />
                         <!--end::Inputs-->
                     </label>
@@ -69,7 +69,7 @@
                         <div class="col">
                             <div class="mb-5">
                                 <div class="form-floating mb-2">
-                                    <select class="form-select form-select-solid js-select2" data-placeholder="Select Author" asp-for="CategoryId" asp-items="@Model.Categories">
+                                    <select class="form-select form-select-solid js-select2" data-placeholder="Select Category" asp-for="CategoryId" asp-items="@Model.Categories">
                                         <option value="">Select category</option>
                                     </select>
                                     <label asp-for="CategoryId"></label>
@@ -78,29 +78,50 @@
                             </div>
                         </div>
                     </div>
-                   <div class="row">
+                    <div class="row">
                         <div class="col">
-                            <div class="mb-5">
+                            <div class="mb-5 ">
                                 <div class="form-floating mb-2">
-                                    <input type="text" class="form-control form-control-solid form-control form-control-solid-solid" placeholder="Link Image" asp-for="LinkImageUrl" />
-                                    <label asp-for="LinkImageUrl"></label>
+                                    <input type="url" class="form-control form-control-solid form-control form-control-solid-solid " pattern="https://.*" placeholder="Link Image" asp-for="ImageLinkUrl" />
+                                    <label asp-for="ImageLinkUrl"></label>
                                 </div>
-                                <span asp-validation-for="LinkImageUrl" class="text-danger d-block"></span>
+                                <span asp-validation-for="ImageLinkUrl" class="text-danger d-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                      <div class="row ">
+                        <div class="col">
+                            <div class="mb-5 ">
+                                <div class="form-floating mb-2 d-none js-secoud-input">
+                                    <input type="url" class="form-control form-control-solid form-control form-control-solid-solid " placeholder="Link Image" asp-for="ImageSecondaryUrl" />
+                                    <label asp-for="ImageSecondaryUrl"></label>
+                                </div>
+                                <span asp-validation-for="ImageSecondaryUrl" class="text-danger d-block"></span>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
-                            <div class="mb-5">
-                                <div class="form-floating mb-2 js-tweezers">
-                                    <input type="text" class="form-control form-control-solid form-control form-control-solid-solid " placeholder="Secoundary Link Image" asp-for="SecondaryImageUrl" />
-                                    <label asp-for="SecondaryImageUrl"></label>
+                            <div class="mb-5 ">
+                                <div class="form-floating mb-2 d-none js-third-input">
+                                    <input type="url" class="form-control form-control-solid form-control form-control-solid-solid " placeholder="Link Image" asp-for="ImageThirdUrl" />
+                                    <label asp-for="ImageThirdUrl"></label>
                                 </div>
-                                <span asp-validation-for="SecondaryImageUrl" class="text-danger d-block"></span>
+                                <span asp-validation-for="ImageThirdUrl" class="text-danger d-block"></span>
                             </div>
                         </div>
                     </div>
-
+                    <div class="row">
+                        <div class="col">
+                            <div class="mb-5 ">
+                                <div class="form-floating mb-2 d-none js-fourth-input">
+                                    <input type="url" class="form-control form-control-solid form-control form-control-solid-solid " placeholder="Link Image" asp-for="ImageFourthUrl" />
+                                    <label asp-for="ImageFourthUrl"></label>
+                                </div>
+                                <span asp-validation-for="ImageFourthUrl" class="text-danger d-block"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-7">
                     <div class="mb-5">
@@ -124,7 +145,7 @@
                 Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
             </span>
         </button>
-        <a class="btn btn-light text-primary" asp-action="Index">Cancel</a>
+        <a class="btn btn-light text-primary" asp-action="Index">Cancel</a> 
     </div>
 </div>
 
@@ -132,9 +153,12 @@
     <script src="~/assets/plugins/tinymce/tinymce.bundle.js"></script>
     <partial name="_ValidationScriptsPartial" />
     <script>
-        $('#js-img-id').on('change',function(){
-            $('.js-tweezers').addClass("d-none");
-            
+        $(document).ready(function () {
+ 
+            $("#LinkImageUrl").on("change",function () { $(".js-secoud-input").removeClass('d-none');} );
+            $("#SecondaryImageUrl").on("change", function () { $(".js-third-input").removeClass('d-none'); });
+            $("#ThirdImageUrl").on("change", function () { $(".js-fourth-input").removeClass('d-none'); }); 
         });
+
     </script>
 }

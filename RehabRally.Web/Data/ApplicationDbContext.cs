@@ -13,6 +13,8 @@ namespace RehabRally.Web.Data
 		}
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Exercise> Exercises { get; set; }
+		public DbSet<PatientExercise> PatientExercises { get; set; }
+		public DbSet<RegisterdMashine> RegisterdMashines { get; set; }
 
 	}
 }

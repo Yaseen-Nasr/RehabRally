@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\ManagePatient\" />
     <Folder Include="wwwroot\images\exercises\thumb\" />
   </ItemGroup>
 

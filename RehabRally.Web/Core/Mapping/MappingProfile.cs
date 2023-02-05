@@ -21,6 +21,9 @@ namespace RehabRally.Web.Core.Mapping
             CreateMap<Exercise, ExerciseViewModel>()
               .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category!.Name))
               ;
+            CreateMap<Exercise, SelectListItem>()
+            .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Title));
 
             //users
             CreateMap<ApplicationUser, UserViewModel>();
@@ -29,6 +32,11 @@ namespace RehabRally.Web.Core.Mapping
                 .ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.UserName.ToUpper()))
                 .ReverseMap()
                 ;
+
+            //patientExercise 
+            CreateMap<PatientExercise, AssignExerciseFormViewModel>()
+                .ReverseMap();
+
         }
     }
 }

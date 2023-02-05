@@ -20,8 +20,13 @@ namespace RehabRally.Web.Core.ViewModels
 
         [MaxLength(200, ErrorMessage = Errors.MaxLength), EmailAddress]
         [Remote("AllowEmail", controller: null!, AdditionalFields = "Id", ErrorMessage = Errors.Duplicated)]
-        public string Email { get; set; } = null!;
+        public string Email { get; set; } = null!; 
 
+        [Phone]
+        [Display(Name = "Phone number"), MaxLength(11, ErrorMessage = Errors.MaxLength),
+                    RegularExpression(RegexPatterns.MbobileNumber, ErrorMessage = Errors.InvalidPhoneNumber)]
+         public string MobileNumber { get; set; } = null!; 
+        public int Age { get; set; }  
         [StringLength(100, ErrorMessage = Errors.MaxMinLength, MinimumLength = 6),
             RegularExpression(RegexPatterns.Password, ErrorMessage = Errors.WeekPassword)]
         [DataType(DataType.Password)]

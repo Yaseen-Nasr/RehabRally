@@ -18,10 +18,16 @@ namespace RehabRally.Web.Core.ViewModels
         public string? ImageUrl { get; set; }
         public string? ImageThumbnailUrl { get; set; }
         [Display(Name = "Default Image Link")]  
-        public string? LinkImageUrl { get; set; }
-        [Display(Name = "Secoundary Link Image")]
-        [AssertThat("LinkImageUrl != null", ErrorMessage = Errors.EmptyLinkImege)] 
-        public string? SecondaryImageUrl { get; set; }
+        public string? ImageLinkUrl { get; set; }
+        [Display(Name = "Secoundary Image Link")]
+        [AssertThat("ImageThumbnailUrl != null", ErrorMessage = Errors.EmptyDefaultLinkImege)]
+        public string? ImageSecondaryUrl { get; set; }
+        [Display(Name = "Third Image Link")]
+        [AssertThat("ImageSecondaryUrl  != null", ErrorMessage = Errors.EmptyPreviousLinkImege)]
+        public string? ImageThirdUrl { get; set; }
+        [Display(Name = "Fourth Image Link")]
+        [AssertThat("ImageThirdUrl != null", ErrorMessage = Errors.EmptyPreviousLinkImege)]
+        public string? ImageFourthUrl { get; set; }
         public string Description { get; set; } = null!; 
         [Display(Name = "Category")]
         [Remote("AllowItem", null, AdditionalFields = "Id,Title",
@@ -29,6 +35,6 @@ namespace RehabRally.Web.Core.ViewModels
         public int CategoryId { get; set; }
 
         public IEnumerable<SelectListItem>? Categories{ get; set; }
-
+ 
     }
 }

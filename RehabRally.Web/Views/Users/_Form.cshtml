@@ -33,7 +33,23 @@
         <span asp-validation-for="Email" class="text-danger d-block"></span>
     </div>
 
-    
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="text" class="form-control form-control-solid" placeholder="Mobile Number" asp-for="MobileNumber" />
+            <label asp-for="MobileNumber"></label>
+        </div>
+        <span asp-validation-for="MobileNumber" class="text-danger d-block"></span>
+
+    </div>
+       <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="number" class="form-control form-control-solid" placeholder="Mobile Number" asp-for="Age" />
+            <label asp-for="Age"></label>
+        </div>
+        <span asp-validation-for="Age" class="text-danger d-block"></span>
+
+    </div>
+
     @if (string.IsNullOrEmpty(Model?.Id))
     {
         <div class="mb-5">

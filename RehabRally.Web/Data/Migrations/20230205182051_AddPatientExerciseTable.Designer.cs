@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RehabRally.Web.Data;
 
@@ -11,9 +12,10 @@ using RehabRally.Web.Data;
 namespace RehabRally.Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230205182051_AddPatientExerciseTable")]
+    partial class AddPatientExerciseTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -315,16 +317,10 @@ namespace RehabRally.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageFourthUrl")
+                    b.Property<string>("FourthImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageLinkUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageSecondaryUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageThirdUrl")
+                    b.Property<string>("ImagePublicId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageThumbnailUrl")
@@ -341,6 +337,15 @@ namespace RehabRally.Web.Data.Migrations
 
                     b.Property<DateTime?>("LastUpdatedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("LinkImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecondaryImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThirdImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -371,9 +376,6 @@ namespace RehabRally.Web.Data.Migrations
 
                     b.Property<int>("ExerciseId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDone")
-                        .HasColumnType("bit");
 
                     b.Property<int>("Repetions")
                         .HasColumnType("int");

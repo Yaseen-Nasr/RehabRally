@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RehabRally.Web.Data;
 
@@ -11,9 +12,10 @@ using RehabRally.Web.Data;
 namespace RehabRally.Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230203115321_makeimagesFiledsFourthToEXERCISES")]
+    partial class makeimagesFiledsFourthToEXERCISES
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,9 +165,6 @@ namespace RehabRally.Web.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -202,9 +201,6 @@ namespace RehabRally.Web.Data.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("MobileNumber")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -315,16 +311,10 @@ namespace RehabRally.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageFourthUrl")
+                    b.Property<string>("FourthImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageLinkUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageSecondaryUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageThirdUrl")
+                    b.Property<string>("ImagePublicId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageThumbnailUrl")
@@ -341,6 +331,15 @@ namespace RehabRally.Web.Data.Migrations
 
                     b.Property<DateTime?>("LastUpdatedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("LinkImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecondaryImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThirdImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -359,61 +358,6 @@ namespace RehabRally.Web.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Exercises");
-                });
-
-            modelBuilder.Entity("RehabRally.Web.Core.Models.PatientExercise", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDone")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Repetions")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Sets")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SetsDoneCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExerciseId");
-
-                    b.ToTable("PatientExercises");
-                });
-
-            modelBuilder.Entity("RehabRally.Web.Core.Models.RegisterdMashine", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("FirebaseToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RegisterdMashines");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -503,17 +447,6 @@ namespace RehabRally.Web.Data.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("LastUpdatedBy");
-                });
-
-            modelBuilder.Entity("RehabRally.Web.Core.Models.PatientExercise", b =>
-                {
-                    b.HasOne("RehabRally.Web.Core.Models.Exercise", "Exercise")
-                        .WithMany()
-                        .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Exercise");
                 });
 #pragma warning restore 612, 618
         }

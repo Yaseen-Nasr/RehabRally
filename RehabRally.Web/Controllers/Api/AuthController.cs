@@ -22,8 +22,7 @@ namespace RehabRally.Web.Controllers.Api
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWT _jwt;
         private readonly IAuthService _authService;
-        private readonly IHttpContextAccessor httpContextAccessor;
-
+ 
         public AuthController(UserManager<ApplicationUser> userManager,
                         IOptions<JWT> jwt,
                         RoleManager<IdentityRole> roleManager,

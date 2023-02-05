@@ -225,6 +225,9 @@ namespace RehabRally.Web.Controllers
             var viewModel = _mapper.Map<ExerciseViewModel>(book);
             return View(viewModel);
         }
+
+      
+
         public IActionResult AllowItem(ExerciseFormViewModel model)
         {
             var exerise = _context.Exercises.SingleOrDefault(b => b.Title == model.Title && b.CategoryId== model.CategoryId);
@@ -235,7 +238,7 @@ namespace RehabRally.Web.Controllers
         {
             ExerciseFormViewModel viewModel = model is null ? new ExerciseFormViewModel() : model; 
             var categories = _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToList(); 
-            viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories); 
+            viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories);
             return viewModel;
         }
         ////Get image Thumbnail Url

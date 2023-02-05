@@ -31,9 +31,9 @@ $(document).ready(function () {
                 "className": "d-flex align-items-center",
                 "render": function (data, type, row) {
                     return `<div class="symbol symbol-50px overflow-hidden me-3">
-                                                               <a data-fslightbox href="${(row.imageUrl === null ? row.linkImageUrl : row.imageUrl)}">
+                                                               <a data-fslightbox href="${(row.imageUrl === null ? row.imageLinkUrl : row.imageUrl)}">
                                                                    <div class="symbol-label h-70px">
-                                                                       <img src="${(row.imageThumbnailUrl === null ? row.linkImageUrl : row.imageThumbnailUrl)}" alt="cover" class="w-100">
+                                                                       <img src="${(row.imageThumbnailUrl === null ? row.imageLinkUrl : row.imageThumbnailUrl)}" alt="cover" class="w-100">
                                                                    </div>
                                                                </a>
                                                            </div>

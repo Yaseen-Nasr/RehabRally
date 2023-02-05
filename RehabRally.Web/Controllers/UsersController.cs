@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using RehabRally.Web.Core.Consts;
 using System.Data;
 using RehabRally.Web.Core.ViewModels;
+using RehabRally.Web.Data;
 
 namespace RehabRally.Web.Controllers
 {
@@ -22,25 +23,27 @@ namespace RehabRally.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
- 
+        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-       
+
         public UsersController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager, 
+            RoleManager<IdentityRole> roleManager,
             IMapper mapper
-
+,
+            ApplicationDbContext context
             )
         {
             _userManager = userManager;
-            _roleManager = roleManager; 
+            _roleManager = roleManager;
             _mapper = mapper;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
-            var viewModel = _mapper.Map<IEnumerable<UserViewModel>>(users);
+            var viewModel = _mapper.Map<IEnumerable<UserViewModel>>(users.Where(u=>u.Email != "mohamed@rehabrally.com"));
             return View(viewModel);
         }
         [HttpGet]
@@ -123,7 +126,7 @@ namespace RehabRally.Web.Controllers
 
             return PartialView("_ResetPassword", viewModel);
         }
-        [HttpPost]
+        [HttpPost] 
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordFormViewModel model)
         {
@@ -148,6 +151,20 @@ namespace RehabRally.Web.Controllers
             await _userManager.UpdateAsync(user);
             return BadRequest(string.Join(", ", result.Errors.Select(e => e.Description)));
 
+        }
+        public async Task<IActionResult> Details(string id)
+        {
+            var user=await _userManager.FindByIdAsync(id);
+            if(user is null) 
+                return BadRequest();    
+            var viewModel=_mapper.Map<UserViewModel>(user);
+            viewModel.AssignExercise = new AssignExerciseFormViewModel();
+            var categories = _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToList();
+
+            viewModel.AssignExercise.UserId = user.Id;
+            viewModel.AssignExercise.Categories= _mapper.Map<IEnumerable<SelectListItem>>(categories);
+
+            return View(viewModel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
