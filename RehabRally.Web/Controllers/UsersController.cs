@@ -18,7 +18,7 @@ using RehabRally.Web.Data;
 
 namespace RehabRally.Web.Controllers
 {
-    [Authorize(Roles = AppRoles.Doctor)] 
+    [Authorize(Roles = AppRoles.Doctor)]
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -43,7 +43,7 @@ namespace RehabRally.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
-            var viewModel = _mapper.Map<IEnumerable<UserViewModel>>(users.Where(u=>u.Email != "mohamed@rehabrally.com"));
+            var viewModel = _mapper.Map<IEnumerable<UserViewModel>>(users.Where(u => u.Email != "mohamed@rehabrally.com"));
             return View(viewModel);
         }
         [HttpGet]
@@ -65,12 +65,14 @@ namespace RehabRally.Web.Controllers
                 FullName = model.FullName,
                 UserName = model.UserName,
                 Email = model.Email,
+                MobileNumber= model.MobileNumber,
+                Age= model.Age,
                 CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value
             };
             var results = await _userManager.CreateAsync(user, model.Password);
             if (results.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, AppRoles.Patient);  
+                await _userManager.AddToRoleAsync(user, AppRoles.Patient);
                 return PartialView("_UserRow", _mapper.Map<UserViewModel>(user));
             };
 
@@ -84,8 +86,8 @@ namespace RehabRally.Web.Controllers
 
             if (user is null)
                 return NotFound();
-            var viewModel = _mapper.Map<UserFormViewModel>(user); 
-             return PartialView("_Form", viewModel);
+            var viewModel = _mapper.Map<UserFormViewModel>(user);
+            return PartialView("_Form", viewModel);
         }
 
         [HttpPost]
@@ -103,7 +105,7 @@ namespace RehabRally.Web.Controllers
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                var currentRoles = await _userManager.GetRolesAsync(user); 
+                var currentRoles = await _userManager.GetRolesAsync(user);
                 var viewModel = _mapper.Map<UserViewModel>(user);
                 return PartialView("_UserRow", viewModel);
             }
@@ -126,7 +128,7 @@ namespace RehabRally.Web.Controllers
 
             return PartialView("_ResetPassword", viewModel);
         }
-        [HttpPost] 
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordFormViewModel model)
         {
@@ -154,16 +156,26 @@ namespace RehabRally.Web.Controllers
         }
         public async Task<IActionResult> Details(string id)
         {
-            var user=await _userManager.FindByIdAsync(id);
-            if(user is null) 
-                return BadRequest();    
-            var viewModel=_mapper.Map<UserViewModel>(user);
+            var user = await _userManager.FindByIdAsync(id);
+            if (user is null)
+                return BadRequest();
+            var viewModel = _mapper.Map<UserViewModel>(user);
             viewModel.AssignExercise = new AssignExerciseFormViewModel();
             var categories = _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToList();
 
             viewModel.AssignExercise.UserId = user.Id;
-            viewModel.AssignExercise.Categories= _mapper.Map<IEnumerable<SelectListItem>>(categories);
+            viewModel.AssignExercise.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories);
+            viewModel.PatientExercises = _context.PatientExercises.Include(pa => pa.Exercise).Where(a => a.UserId == user.Id)
+                                                       .Select(e => new PatientExerciseViewModel()
+                                                      {
+                                                          Exercise = e.Exercise!.Title,
+                                                          IsDone = e.IsDone,
+                                                          Repetions = e.Repetions,
+                                                          Sets = e.Sets,
+                                                          CreatedOn=e.CreatedOn,
+                                                          SetsDoneCount=e.SetsDoneCount,
 
+                                                      }).ToList();
             return View(viewModel);
         }
         [HttpPost]
@@ -183,6 +195,49 @@ namespace RehabRally.Web.Controllers
             await _userManager.UpdateAsync(user);
             return Ok(user.LastUpdatedOn.ToString());
         }
+        [HttpGet]
+        [AjaxOnly]
+        public async Task<IActionResult> AssignExerciseToPatient(string userId)
+        {
+            var viewModel = new AssignExerciseFormViewModel()
+            {
+                UserId = userId,
+            };
+            viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(await _context.Categories.ToListAsync());
+
+            return PartialView("_AssignTask", viewModel);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePatientExercise(AssignExerciseFormViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var patientExercise = _mapper.Map<PatientExercise>(viewModel);
+            _context.PatientExercises.Add(patientExercise);
+            _context.SaveChanges();
+            //ToDo:: Return viweModel And Attach it with OverView for patient details
+            var patientExerciseVM = new PatientExerciseViewModel()
+            {
+                CreatedOn = patientExercise.CreatedOn, 
+                IsDone = false,
+                Repetions = patientExercise.Repetions,
+                Sets = patientExercise.Sets,
+                SetsDoneCount = patientExercise.SetsDoneCount
+            };
+            patientExerciseVM.Exercise = await _context.Exercises.Where(s => s.Id == patientExercise.ExerciseId).Select(s => s.Title).SingleOrDefaultAsync() ?? "";
+            return PartialView("_PatientExerciseRow", patientExerciseVM);
+        }
+
+        public async Task<IActionResult> GetCategoryExercises(int categoryId)
+        {
+            var exercises =await _context.Exercises.Where(a => a.CategoryId == categoryId).OrderBy(a => a.Title).ToListAsync();
+
+            var selectedexercises = _mapper.Map<IEnumerable<SelectListItem>>(exercises);
+            return Ok(selectedexercises);
+        }
+
         public async Task<IActionResult> AllowUserName(UserFormViewModel model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);

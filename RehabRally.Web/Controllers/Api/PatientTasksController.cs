@@ -27,7 +27,7 @@ namespace RehabRally.Web.Controllers.Api
         }
         [HttpGet("getMyTasks")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetAllExercises()
+        public async Task<IActionResult> GetAllTasks()
         {
             try
             {
@@ -70,13 +70,35 @@ namespace RehabRally.Web.Controllers.Api
             if (exercise is null)
                 return NotFound("some thing went wrong!!");
 
-            taskDetails.ImageUrls = GetStringProperties(exercise);
+            taskDetails.ImageUrls = GetImageUrlProperties(exercise);
 
             return Ok(taskDetails);
 
         }
+        //Go To TaskDetails
+        [HttpGet("ModifyTaskSetsCount")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> ModifyTaskSetsCount(int taskId)
+        {
+            var userId = User.FindFirstValue("uid");
+            if (userId is null)
+                return BadRequest();
 
-        private List<string> GetStringProperties(Exercise obj)
+            var patientExercise = await _context.PatientExercises
+                                    .Where(x => x.Id == taskId && x.UserId == userId).FirstOrDefaultAsync();
+            if (patientExercise is null)
+                return NotFound("there's no task!!");
+
+            if (patientExercise.IsDone)
+                return Ok("You have already Finished it");
+            patientExercise.SetsDoneCount += 1;
+            patientExercise.IsDone = patientExercise.SetsDoneCount == patientExercise.Sets;
+            _context.Update(patientExercise);
+            await _context.SaveChangesAsync();
+            return Ok("Great jop, Keep The work up!!");
+        }
+
+        private List<string> GetImageUrlProperties(Exercise obj)
         {
             List<string> propertyValues = new List<string>();
             PropertyInfo[] properties = obj.GetType().GetProperties();

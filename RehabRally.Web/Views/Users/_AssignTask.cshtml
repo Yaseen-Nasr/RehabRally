@@ -1,12 +1,12 @@
 ﻿@model AssignExerciseFormViewModel
+@*data-ajax-complete="onAddCopySuccess"*@
 
-<form asp-action="Create" asp-controller="ManagePatient"
+<form asp-action="CreatePatientExercise" asp-controller="Users"
       data-ajax-method="post"
       data-ajax="true"
       data-ajax-begin="onModalBegin"
       data-ajax-success="@(Model?.Id > 0 ? "onEditCopySuccess" : "onAddCopySuccess")"
-      data-ajax-failure="showErrorMessage"
-      data-ajax-complete="onModalComplete">
+      data-ajax-failure="showErrorMessage" > 
 
     <input type="hidden" asp-for="UserId" />
     @if (Model?.Id > 0)
@@ -15,7 +15,7 @@
     }
     <div class="mb-5">
         <div class="form-floating mb-2">
-            <select class="form-select form-select-solid js-select2" id="js-category" data-placeholder="Select Category" asp-for="CategoryId" asp-items="@Model.Categories">
+            <select class="form-select form-select-solid js-select2" id="js-category" data-placeholder="Select Category" onchange="onChangeCategory()" asp-for="CategoryId" asp-items="@Model.Categories">
                 <option value="">Select category</option>
             </select>
             <label asp-for="CategoryId"></label>

@@ -36,7 +36,8 @@ namespace RehabRally.Web.Core.Mapping
             //patientExercise 
             CreateMap<PatientExercise, AssignExerciseFormViewModel>()
                 .ReverseMap();
-
+             
+  
         }
     }
 }

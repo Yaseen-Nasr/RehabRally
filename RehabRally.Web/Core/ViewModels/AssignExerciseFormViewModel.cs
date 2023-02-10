@@ -15,6 +15,7 @@ namespace RehabRally.Web.Core.ViewModels
         public IEnumerable<SelectListItem>? Categories{ get; set; } 
         public int Sets { get; set; }
         public int Repetions { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
 
     }
 }

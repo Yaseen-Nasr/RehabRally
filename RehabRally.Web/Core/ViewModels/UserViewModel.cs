@@ -12,6 +12,8 @@
         public string MobileNumber { get; set; } = null!;
         public int Age { get; set; }
 
-        public AssignExerciseFormViewModel? AssignExercise { get; set; } 
+        public AssignExerciseFormViewModel? AssignExercise { get; set; }
+        public IEnumerable<PatientExerciseViewModel> PatientExercises { get; set; } = null!;
+
     }
 }

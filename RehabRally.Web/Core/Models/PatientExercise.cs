@@ -15,6 +15,7 @@ namespace RehabRally.Web.Core.Models
         public int ExerciseId { get; set; } 
         public  Exercise? Exercise { get; set; }
         public  bool IsDone{ get; set; }
+        public DateTime CreatedOn { get; set; }
 
 
     }

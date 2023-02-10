@@ -6,8 +6,10 @@ function onAddCopySuccess(row) {
     $('tbody').prepend(row);
     KTMenu.createInstances();
 
-    var count = $('#CopiesCount');
+    var count = $('#ExercisesCount');
+    console.log("count " + parseInt(count.text()));
     var newCount = parseInt(count.text()) + 1;
+    console.log("fggfgffg " + newCount);
     count.text(newCount);
 
     $('.js-alert').addClass('d-none');
@@ -22,25 +24,25 @@ function onEditCopySuccess(row) {
     KTMenu.createInstances();
 }
 
-$(document).ready(function () {
-     $("#js-category").change(function () {
-        var selectedVal = $("#js-category option:selected").val();
-         var url = '/ManagePatient/GetCategoryExercises?categoryId=' + selectedVal;
-        $.post({
-            url: url,
-            success: function (exercises) {
-                $('#js-exercises').find('option:not(:first)').remove();
-                $.each(exercises, function (i, exercise) {
-                    $('#js-exercises').append($('<option>', {
-                        value: exercise.value,
-                        text: exercise.text
-                    }));
-                });
-            },
-            error: function () {
-                showErrorMessage();
-            }
-        });
+function onChangeCategory() {
 
+    var selectedVal = $("#js-category option:selected").val();
+    var url = '/Users/GetCategoryExercises?categoryId=' + selectedVal;
+    $.post({
+        url: url,
+        success: function (exercises) {
+
+            $('#js-exercises').find('option:not(:first)').remove();
+            $.each(exercises, function (i, exercise) {
+                $('#js-exercises').append($('<option>', {
+                    value: exercise.value,
+                    text: exercise.text
+                }));
+            });
+        },
+        error: function () {
+            showErrorMessage();
+        }
     });
-});
+
+};
