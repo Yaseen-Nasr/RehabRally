@@ -9,6 +9,7 @@ Physiotherapy clinic management application.
 
 2) apply secure Api's to deal with Mobile App 
   To let users to login to app and deel with his exercises and and interact with them when he finish it 
+
 3)Real Time notifications from Doctor to Users
 
 
