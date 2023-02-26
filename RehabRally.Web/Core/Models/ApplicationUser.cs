@@ -15,8 +15,8 @@ namespace RehabRally.Web.Core.Models
         public DateTime CreatedOn { get; set; } = DateTime.Now;
         public string? LastUpdatedById { get; set; }
         public string? MobileNumber { get; set; }
-        public int Age { get; set; }
-
+        public int Age { get; set; } 
         public DateTime? LastUpdatedOn { get; set; }
+
     }
 }

@@ -10,7 +10,7 @@ function onAddCopySuccess(row) {
     console.log("count " + parseInt(count.text()));
     var newCount = parseInt(count.text()) + 1;
     console.log("fggfgffg " + newCount);
-    count.text(newCount);
+    count.text(newCount + " Eexercise");
 
     $('.js-alert').addClass('d-none');
     $('table').removeClass('d-none');

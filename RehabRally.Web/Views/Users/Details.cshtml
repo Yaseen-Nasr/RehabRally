@@ -95,7 +95,11 @@
                 <a class="nav-link text-active-primary pb-4 active" data-bs-toggle="tab" href="#Overview" aria-selected="false" role="tab" tabindex="-1">Overview</a>
             </li>
             <!--end:::Tab item-->
-         
+            <!--begin:::Tab item-->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#Conclusion" aria-selected="true" role="tab">Conclusion</a>
+            </li>
+            <!--end:::Tab item-->
         </ul>
         <!--end:::Tabs-->
         <!--begin:::Tab content-->
@@ -128,7 +132,7 @@
                                         <!--end::Svg Icon-->
                                         <div class="ms-2" id="ExercisesCount">
                                             @Model.PatientExercises.Count()
-                                            <span class="text-muted fs-4 fw-semibold"> exercise</span>
+                                            <span class="text-muted fs-4 fw-semibold"> Exercise</span>
                                         </div>
                                     </div>
                                     <div class="fs-7 fw-normal text-muted"></div>
@@ -226,21 +230,55 @@
                 <!--end::Card-->
             </div>
             <!--end:::Tab pane-->
-          
+            <!--begin:::Tab pane-->
+            <div class="tab-pane fade" id="Conclusion" role="tabpanel">
+                <!--begin::Card header-->
+                <div class="card pt-4 mb-6 mb-xl-9">
+                    <!--begin::Card header-->
+                    <div class="card-header border-0">
+                        <!--begin::Card title-->
+                        <div class="card-title">
+                            Add Conclusion
+                        </div>
+                        <!--end::Card title-->
+                    </div>
+                    <!--end::Card header-->
+                    <div class="card-body">
+                        <form method="post" asp-action="AddConclusion" asp-route-userId="@Model.Id" asp-route-conclusion="@Model.Conclusion" id="form">
+                            <input type="hidden" asp-for="Id" />
+                            <div class="mb-5">
+                                <div class="form-floating mb-2">
+                                    <input type="text" class="form-control form-control-solid" placeholder="Conclusion" asp-for="Conclusion" />
+                                    <label asp-for="Conclusion"></label>
+                                </div>
+                                <span asp-validation-for="Conclusion" class="text-danger d-block"></span>
+                            </div> 
+                        </form>
+                        <button type="submit" class="btn btn-primary" form="form" >
+                            <span class="indicator-label">
+                                Submit
+                            </span>
+                            <span class="indicator-progress">
+                                Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <!--end:::Tab pane-->
+            </div>
+            <!--end:::Tab content-->
         </div>
-        <!--end:::Tab content-->
+        <!--end::Content-->
     </div>
-    <!--end::Content-->
-</div>
 
-@section Plugins
-    {
-    <script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
+    @section Plugins
+        {
+        <script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
 
- }
-@section Scripts
-    {
+    }
+    @section Scripts
+        {
 
-    <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/exercises-details.js" asp-append-version="true"></script>
-}
+        <partial name="_ValidationScriptsPartial" />
+        <script src="~/js/exercises-details.js" asp-append-version="true"></script>
+    }

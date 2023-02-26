@@ -11,8 +11,7 @@ namespace RehabRally.Web.Core.Models
         public int Id { get; set; }
         [MaxLength(300)]
         public string Title { get; set; } = null!;
-        public string? ImageUrl { get; set; }
-        //public string? ImagePublicId { get; set; }
+        public string? ImageUrl { get; set; } 
         public string? ImageThumbnailUrl { get; set; } 
         public string? ImageLinkUrl { get; set; } 
         public string? ImageSecondaryUrl { get; set; } 

@@ -32,7 +32,19 @@ namespace RehabRally.Web.Controllers.Api
             try
             {
                 var userId = User.FindFirstValue("uid");
-                var exercises = await _context.PatientExercises.Where(x => x.UserId == userId && !x.IsDone).ToListAsync();
+                var exercises = await _context.PatientExercises
+                                                        .Where(x => x.UserId == userId )
+                                                        .Include(x=>x.Exercise)
+                                                        .Select(e=>new
+                                                        {
+                                                            e.Id,
+                                                            e.Exercise!.Title,
+                                                             e.Sets ,
+                                                             e.Repetions,
+                                                             e.IsDone
+
+                                                        })
+                                                        .ToListAsync();
 
                 return Ok(exercises);
             }
@@ -46,7 +58,7 @@ namespace RehabRally.Web.Controllers.Api
         //Go To TaskDetails
         [HttpGet("GetTaskDetails")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetTaskDetails(int taskId)
+        public async Task<IActionResult> GetTaskDetails([FromQuery]int taskId)
         {
             var userId = User.FindFirstValue("uid");
             if (userId is null)
@@ -54,7 +66,8 @@ namespace RehabRally.Web.Controllers.Api
 
             var taskDetails = await _context.PatientExercises
                                     .Where(x => x.Id == taskId && x.UserId == userId)
-                                        .Select(x => new TaskDetailsDto
+                                   .Include(x=>x.Exercise)
+                                    .Select(x => new TaskDetailsDto
                                         {
                                             TaskId = x.Id,
                                             ExerciseId = x.ExerciseId,
@@ -62,6 +75,7 @@ namespace RehabRally.Web.Controllers.Api
                                             Repetions = x.Repetions,
                                             Sets = x.Sets,
                                             SetsDoneCount = x.SetsDoneCount,
+                                        Description= x.Exercise!.Description
                                         }).FirstOrDefaultAsync();
             if (taskDetails is null)
                 return NotFound("there's no task!!");

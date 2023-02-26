@@ -65,8 +65,8 @@ namespace RehabRally.Web.Controllers
                 FullName = model.FullName,
                 UserName = model.UserName,
                 Email = model.Email,
-                MobileNumber= model.MobileNumber,
-                Age= model.Age,
+                MobileNumber = model.MobileNumber,
+                Age = model.Age,
                 CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value
             };
             var results = await _userManager.CreateAsync(user, model.Password);
@@ -167,18 +167,31 @@ namespace RehabRally.Web.Controllers
             viewModel.AssignExercise.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories);
             viewModel.PatientExercises = _context.PatientExercises.Include(pa => pa.Exercise).Where(a => a.UserId == user.Id)
                                                        .Select(e => new PatientExerciseViewModel()
-                                                      {
-                                                          Exercise = e.Exercise!.Title,
-                                                          IsDone = e.IsDone,
-                                                          Repetions = e.Repetions,
-                                                          Sets = e.Sets,
-                                                          CreatedOn=e.CreatedOn,
-                                                          SetsDoneCount=e.SetsDoneCount,
+                                                       {
+                                                           Exercise = e.Exercise!.Title,
+                                                           IsDone = e.IsDone,
+                                                           Repetions = e.Repetions,
+                                                           Sets = e.Sets,
+                                                           CreatedOn = e.CreatedOn,
+                                                           SetsDoneCount = e.SetsDoneCount,
 
-                                                      }).ToList();
+                                                       }).ToList();
             return View(viewModel);
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddConclusion(string userId, string conclusion)
+        {
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null )
+                return NotFound();  
+             await _context.AddAsync(new PatientConclusion { UserId= userId, Conclusion = conclusion });
+           await _context.SaveChangesAsync();
+            return Ok("Done");
+        }  [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(string id)
         {
@@ -209,7 +222,7 @@ namespace RehabRally.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePatientExercise(AssignExerciseFormViewModel viewModel)
+        public async Task<IActionResult> AssignExerciseToPatient(AssignExerciseFormViewModel viewModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -229,6 +242,7 @@ namespace RehabRally.Web.Controllers
             patientExerciseVM.Exercise = await _context.Exercises.Where(s => s.Id == patientExercise.ExerciseId).Select(s => s.Title).SingleOrDefaultAsync() ?? "";
             return PartialView("_PatientExerciseRow", patientExerciseVM);
         }
+
 
         public async Task<IActionResult> GetCategoryExercises(int categoryId)
         {

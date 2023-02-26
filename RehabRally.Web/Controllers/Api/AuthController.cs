@@ -15,25 +15,25 @@ using System.Text;
 namespace RehabRally.Web.Controllers.Api
 {
     [Route("api/[controller]")]
-    [ApiController] 
+    [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager; 
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWT _jwt;
         private readonly IAuthService _authService;
- 
+
         public AuthController(UserManager<ApplicationUser> userManager,
                         IOptions<JWT> jwt,
                         RoleManager<IdentityRole> roleManager,
-                        IAuthService authService 
+                        IAuthService authService
                    )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwt = jwt.Value;
             _authService = authService;
-    
+
         }
 
         [HttpPost("LogIn")]
@@ -49,14 +49,27 @@ namespace RehabRally.Web.Controllers.Api
                 return BadRequest(result.Message);
 
             return Ok(result);
-        }   
-        [HttpGet("domy")]
-        [Authorize(AuthenticationSchemes ="Bearer")]
-        public async Task<IActionResult> Domy()
+        }
+        
+        
+        [HttpGet("userInfo")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> UserInfo()
         {
-            Guid id =Guid.Parse(User.FindFirstValue("uid"));
-            return Ok(id);
-        }   
-       
-     }
+            string id = User.FindFirstValue("uid");
+            var user = await _userManager.FindByIdAsync(id);
+            if (user is null)
+                return BadRequest("Some Thing went wrong");
+
+            return Ok(new
+            { 
+                user.FullName,
+                user.Email,
+                user.UserName,
+                user.PhoneNumber,
+                user.Age,  
+            });
+        }
+
+    }
 }

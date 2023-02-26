@@ -20,7 +20,7 @@ namespace RehabRally.Web.Core.ViewModels
         [Display(Name = "Default Image Link")]  
         public string? ImageLinkUrl { get; set; }
         [Display(Name = "Secoundary Image Link")]
-        [AssertThat("ImageThumbnailUrl != null", ErrorMessage = Errors.EmptyDefaultLinkImege)]
+        [AssertThat("ImageLinkUrl != null", ErrorMessage = Errors.EmptyDefaultLinkImege)]
         public string? ImageSecondaryUrl { get; set; }
         [Display(Name = "Third Image Link")]
         [AssertThat("ImageSecondaryUrl  != null", ErrorMessage = Errors.EmptyPreviousLinkImege)]

@@ -1,4 +1,6 @@
-﻿namespace RehabRally.Web.Core.ViewModels
+﻿using RehabRally.Web.Core.Models;
+
+namespace RehabRally.Web.Core.ViewModels
 {
     public class UserViewModel
     {
@@ -11,9 +13,8 @@
         public DateTime? LastUpdatedOn { get; set; }
         public string MobileNumber { get; set; } = null!;
         public int Age { get; set; }
-
+        public string Conclusion { get; set; } 
         public AssignExerciseFormViewModel? AssignExercise { get; set; }
-        public IEnumerable<PatientExerciseViewModel> PatientExercises { get; set; } = null!;
-
+        public IEnumerable<PatientExerciseViewModel> PatientExercises { get; set; } = null!; 
     }
 }
