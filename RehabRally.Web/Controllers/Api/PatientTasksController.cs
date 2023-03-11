@@ -92,7 +92,7 @@ namespace RehabRally.Web.Controllers.Api
         //Go To TaskDetails
         [HttpGet("ModifyTaskSetsCount")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> ModifyTaskSetsCount(int taskId)
+        public async Task<IActionResult> ModifyTaskSetsCount([FromQuery] int taskId)
         {
             var userId = User.FindFirstValue("uid");
             if (userId is null)
@@ -109,6 +109,7 @@ namespace RehabRally.Web.Controllers.Api
             patientExercise.IsDone = patientExercise.SetsDoneCount == patientExercise.Sets;
             _context.Update(patientExercise);
             await _context.SaveChangesAsync();
+             
             return Ok("Great jop, Keep The work up!!");
         }
 

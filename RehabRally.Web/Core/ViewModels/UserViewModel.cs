@@ -13,6 +13,7 @@ namespace RehabRally.Web.Core.ViewModels
         public DateTime? LastUpdatedOn { get; set; }
         public string MobileNumber { get; set; } = null!;
         public int Age { get; set; }
+        public List<string> Precautions { get; set; } =new List<string>();
         public string Conclusion { get; set; } 
         public AssignExerciseFormViewModel? AssignExercise { get; set; }
         public IEnumerable<PatientExerciseViewModel> PatientExercises { get; set; } = null!; 

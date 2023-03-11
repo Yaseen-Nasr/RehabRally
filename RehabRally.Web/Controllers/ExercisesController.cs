@@ -30,7 +30,7 @@ namespace RehabRally.Web.Controllers
         public ExercisesController(ApplicationDbContext context, IMapper mapper,
             IWebHostEnvironment webHostEnvironment,
               IImageService iImageService)
-            //IOptions<CloudinarySettings> cloudinary
+        //IOptions<CloudinarySettings> cloudinary
 
         {
             _context = context;
@@ -81,9 +81,9 @@ namespace RehabRally.Web.Controllers
             return Ok(jasonData);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View("Form", PopulateViewModel());
+            return View("Form", await PopulateViewModel());
         }
 
         [HttpPost]
@@ -91,7 +91,7 @@ namespace RehabRally.Web.Controllers
         public async Task<IActionResult> Create(ExerciseFormViewModel model)
         {
             if (!ModelState.IsValid)
-                return View("Form", PopulateViewModel(model));
+                return View("Form", await PopulateViewModel(model));
 
             var exercise = _mapper.Map<Exercise>(model);
 
@@ -108,37 +108,24 @@ namespace RehabRally.Web.Controllers
 
                 exercise.ImageUrl = $"{UploadedFiles.ExercisesImages}{imageName}";
                 exercise.ImageThumbnailUrl = $"{UploadedFiles.ExercisesImagesThumnail}{imageName}";
-
-
-                //call cloudaniry service
-                // using var stream= model.Image.OpenReadStream();
-                //var imageParams = new ImageUploadParams()
-                //{
-                //    File = new FileDescription(imageName, stream),
-                //    UseFilename = true
-                //};
-                //var result=await _cloudinary.UploadAsync(imageParams);
-                //book.ImageUrl = result.SecureUrl.ToString();
-                //book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl);
-                //book.ImagePublicId = result.PublicId;
             }
 
-            
-             _context.Add(exercise);
-            _context.SaveChanges();
+
+            await _context.AddAsync(exercise);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id = exercise.Id });
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var book = _context.Exercises.SingleOrDefault(b => b.Id == id);
+            var Exercise = await _context.Exercises.SingleOrDefaultAsync(b => b.Id == id);
 
-            if (book is null)
+            if (Exercise is null)
                 return NotFound();
 
-            var model = _mapper.Map<ExerciseFormViewModel>(book);
-            var viewModel = PopulateViewModel(model); 
+            var model = _mapper.Map<ExerciseFormViewModel>(Exercise);
+            var viewModel = await PopulateViewModel(model);
 
             return View("Form", viewModel);
         }
@@ -150,7 +137,7 @@ namespace RehabRally.Web.Controllers
             if (!ModelState.IsValid)
                 return View("Form", PopulateViewModel(model));
 
-            var exercise = _context.Exercises.SingleOrDefault(b => b.Id == model.Id);
+            var exercise = await _context.Exercises.SingleOrDefaultAsync(b => b.Id == model.Id);
             //string imagePublicId = null;
             if (exercise is null)
                 return NotFound();
@@ -168,7 +155,7 @@ namespace RehabRally.Web.Controllers
                 if (!isUploaded)
                 {
                     ModelState.AddModelError(nameof(model.Image), errorMessage: errorMessage!);
-                    return View("Form", PopulateViewModel(model));
+                    return View("Form", await PopulateViewModel(model));
 
                 }
                 model.ImageUrl = $"{UploadedFiles.ExercisesImages}{imageName}";
@@ -188,56 +175,52 @@ namespace RehabRally.Web.Controllers
             else if (!string.IsNullOrEmpty(exercise.ImageUrl))
             {
                 model.ImageUrl = exercise.ImageUrl;
-                model.ImageThumbnailUrl =    exercise.ImageThumbnailUrl;
+                model.ImageThumbnailUrl = exercise.ImageThumbnailUrl;
             }
 
             exercise = _mapper.Map(model, exercise);
             exercise.LastUpdatedOn = DateTime.Now;
-            //book.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-            //book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl);
-            //book.ImagePublicId=imagePublicId; 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id = exercise.Id });
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ToggleStatus(int id)
+        public async Task<IActionResult> ToggleStatus(int id)
         {
 
-            var exercise = _context.Exercises.Find(id);
+            var exercise = await _context.Exercises.FindAsync(id);
 
             if (exercise is null)
                 return NotFound();
             exercise.IsDeleted = !exercise.IsDeleted;
-            exercise.LastUpdatedOn = DateTime.Now;  
-            _context.SaveChanges();
+            exercise.LastUpdatedOn = DateTime.Now;
+            await _context.SaveChangesAsync();
             return Ok();
         }
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var book = _context.Exercises
-                .Include(a => a.Category) 
-                .SingleOrDefault(b => b.Id == id);
-            if (book is null)
+            var exercise = await _context.Exercises
+                .Include(a => a.Category)
+                .SingleOrDefaultAsync(b => b.Id == id);
+            if (exercise is null)
                 return NotFound();
-            var viewModel = _mapper.Map<ExerciseViewModel>(book);
+            var viewModel = _mapper.Map<ExerciseViewModel>(exercise);
             return View(viewModel);
         }
 
-      
 
-        public IActionResult AllowItem(ExerciseFormViewModel model)
+
+        public async Task<IActionResult> AllowItem(ExerciseFormViewModel model)
         {
-            var exerise = _context.Exercises.SingleOrDefault(b => b.Title == model.Title && b.CategoryId== model.CategoryId);
+            var exerise =await _context.Exercises.SingleOrDefaultAsync(b => b.Title == model.Title && b.CategoryId == model.CategoryId);
             var isAllowed = exerise is null || exerise.Id.Equals(model.Id);
             return Json(isAllowed);
         }
-        private ExerciseFormViewModel PopulateViewModel(ExerciseFormViewModel? model = null)
+        private async Task<ExerciseFormViewModel> PopulateViewModel(ExerciseFormViewModel? model = null)
         {
-            ExerciseFormViewModel viewModel = model is null ? new ExerciseFormViewModel() : model; 
-            var categories = _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToList(); 
+            ExerciseFormViewModel viewModel = model is null ? new ExerciseFormViewModel() : model;
+            var categories = await _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToListAsync();
             viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories);
             return viewModel;
         }
@@ -254,4 +237,4 @@ namespace RehabRally.Web.Controllers
         //}
     }
 }
- 
+

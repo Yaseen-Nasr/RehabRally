@@ -174,8 +174,8 @@ namespace RehabRally.Web.Controllers
                                                            Sets = e.Sets,
                                                            CreatedOn = e.CreatedOn,
                                                            SetsDoneCount = e.SetsDoneCount,
-
                                                        }).ToList();
+            viewModel.Precautions = _context.PatientConclusions.Where(p => p.UserId == user.Id).Select(p => p.Conclusion).ToList();
             return View(viewModel);
         }
 
@@ -186,12 +186,13 @@ namespace RehabRally.Web.Controllers
 
             var user = await _userManager.FindByIdAsync(userId);
 
-            if (user is null )
-                return NotFound();  
-             await _context.AddAsync(new PatientConclusion { UserId= userId, Conclusion = conclusion });
-           await _context.SaveChangesAsync();
-            return Ok("Done");
-        }  [HttpPost]
+            if (user is null)
+                return NotFound();
+            await _context.AddAsync(new PatientConclusion { UserId = userId, Conclusion = conclusion });
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Details", new { id = user.Id });
+        }
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(string id)
         {
@@ -228,12 +229,12 @@ namespace RehabRally.Web.Controllers
                 return BadRequest();
 
             var patientExercise = _mapper.Map<PatientExercise>(viewModel);
-            _context.PatientExercises.Add(patientExercise);
-            _context.SaveChanges();
+            await _context.PatientExercises.AddAsync(patientExercise);
+            await _context.SaveChangesAsync();
             //ToDo:: Return viweModel And Attach it with OverView for patient details
             var patientExerciseVM = new PatientExerciseViewModel()
             {
-                CreatedOn = patientExercise.CreatedOn, 
+                CreatedOn = patientExercise.CreatedOn,
                 IsDone = false,
                 Repetions = patientExercise.Repetions,
                 Sets = patientExercise.Sets,
@@ -246,7 +247,7 @@ namespace RehabRally.Web.Controllers
 
         public async Task<IActionResult> GetCategoryExercises(int categoryId)
         {
-            var exercises =await _context.Exercises.Where(a => a.CategoryId == categoryId).OrderBy(a => a.Title).ToListAsync();
+            var exercises = await _context.Exercises.Where(a => a.CategoryId == categoryId).OrderBy(a => a.Title).ToListAsync();
 
             var selectedexercises = _mapper.Map<IEnumerable<SelectListItem>>(exercises);
             return Ok(selectedexercises);

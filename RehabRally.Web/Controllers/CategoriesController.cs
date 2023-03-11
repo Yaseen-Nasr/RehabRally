@@ -24,9 +24,9 @@ namespace RehabRally.Web.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var categories = _context.Categories.AsNoTracking().ToList();
+            var categories =await _context.Categories.AsNoTracking().ToListAsync();
             var viewModels = _mapper.Map<IEnumerable<CategoryViewModel>>(categories);
 
             return View(viewModels);
@@ -40,15 +40,15 @@ namespace RehabRally.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(CategoryFormViewModel model)
+        public async Task<IActionResult> Create(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
             
 
             var category = _mapper.Map<Category>(model);  
-            _context.Add(category);
-            _context.SaveChanges();
+           await _context.AddAsync(category);
+            await _context.SaveChangesAsync();
 
             var viewModel = _mapper.Map<CategoryViewModel>(category);
 
@@ -60,10 +60,10 @@ namespace RehabRally.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ToggleStatus(int id)
+        public async Task<IActionResult> ToggleStatus(int id)
         {
 
-            var category = _context.Categories.Find(id);
+            var category = await _context.Categories.FindAsync(id);
 
             if (category is null)
                 return NotFound();
@@ -73,14 +73,14 @@ namespace RehabRally.Web.Controllers
             category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
             //tracking..
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
             return Ok(category.LastUpdatedOn.ToString());
         }
         [HttpGet]
         [AjaxOnly]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var category = _context.Categories.Find(id);
+            var category =await _context.Categories.FindAsync(id);
             
             if (category is null)
                 return NotFound();
@@ -91,12 +91,12 @@ namespace RehabRally.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(CategoryFormViewModel model)
+        public async Task<IActionResult> Edit(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var category = _context.Categories.Find(model.Id);
+            var category =await _context.Categories.FindAsync(model.Id);
 
             if (category is null)
                 return NotFound();
@@ -106,7 +106,7 @@ namespace RehabRally.Web.Controllers
             //category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
 
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
 
             var viewModel = _mapper.Map<CategoryViewModel>(category);
 
@@ -114,9 +114,9 @@ namespace RehabRally.Web.Controllers
 
         }
 
-        public IActionResult AllowItem(CategoryFormViewModel model)
+        public async Task<IActionResult> AllowItem(CategoryFormViewModel model)
         {
-            var category = _context.Categories.SingleOrDefault(c => c.Name == model.Name);
+            var category =await _context.Categories.SingleOrDefaultAsync(c => c.Name == model.Name);
             var isAllowed = category is null || category.Id.Equals(model.Id);
             return Json(isAllowed);
         }

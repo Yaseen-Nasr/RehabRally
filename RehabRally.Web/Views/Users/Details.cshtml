@@ -97,9 +97,12 @@
             <!--end:::Tab item-->
             <!--begin:::Tab item-->
             <li class="nav-item" role="presentation">
-                <a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#Conclusion" aria-selected="true" role="tab">Conclusion</a>
+                <a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#Conclusion" aria-selected="true" role="tab">Precaution</a>
             </li>
             <!--end:::Tab item-->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#Precaution" aria-selected="true" role="tab">Precautions</a>
+            </li>
         </ul>
         <!--end:::Tabs-->
         <!--begin:::Tab content-->
@@ -238,7 +241,7 @@
                     <div class="card-header border-0">
                         <!--begin::Card title-->
                         <div class="card-title">
-                            Add Conclusion
+                            Add Precaution
                         </div>
                         <!--end::Card title-->
                     </div>
@@ -248,13 +251,12 @@
                             <input type="hidden" asp-for="Id" />
                             <div class="mb-5">
                                 <div class="form-floating mb-2">
-                                    <input type="text" class="form-control form-control-solid" placeholder="Conclusion" asp-for="Conclusion" />
-                                    <label asp-for="Conclusion"></label>
-                                </div>
+                                    <input type="text" class="form-control form-control-solid" placeholder="Precaution" asp-for="Conclusion" />
+                                 </div>
                                 <span asp-validation-for="Conclusion" class="text-danger d-block"></span>
-                            </div> 
+                            </div>
                         </form>
-                        <button type="submit" class="btn btn-primary" form="form" >
+                        <button type="submit" class="btn btn-primary" form="form">
                             <span class="indicator-label">
                                 Submit
                             </span>
@@ -262,6 +264,50 @@
                                 Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
                             </span>
                         </button>
+                    </div>
+                </div>
+                <!--end:::Tab pane-->
+            </div>
+            <!--end:::Tab content-->
+            <!--begin:::Tab pane-->
+            <div class="tab-pane fade" id="Precaution" role="tabpanel">
+                <!--begin::Card header-->
+                <div class="card pt-4 mb-6 mb-xl-9">
+                    <!--begin::Card header-->
+                    <div class="card-header border-0">
+                        <!--begin::Card title-->
+                        <div class="card-title">
+                            Precautions 
+                        </div>
+                        <!--end::Card title-->
+                    </div>
+                    <!--end::Card header-->
+                    <div class="card-body">
+                        <div class="@(Model.Precautions!.Any() ? "d-none" : string.Empty) alert alert-dismissible bg-light-warning border border-warning border-3 border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 ">
+                            <!--begin::Icon-->
+                            <!--begin::Svg Icon | path: icons/duotune/general/gen007.svg-->
+                            <span class="svg-icon svg-icon-2hx svg-icon-warning me-4 mb-5 mb-sm-0">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="10" fill="currentColor" />
+                                    <rect x="11" y="14" width="7" height="2" rx="1" transform="rotate(-90 11 14)" fill="currentColor" />
+                                    <rect x="11" y="17" width="2" height="2" rx="1" transform="rotate(-90 11 17)" fill="currentColor" />
+                                </svg>
+                            </span>
+                            <!--end::Svg Icon-->
+                            <!--end::Icon-->
+                            <!--begin::Content-->
+                            <div class="d-flex flex-column pe-0 pe-sm-10">
+                                <h5 class="mb-1">No Precautions</h5>
+                                <span>No Precautions assigned for this patient yet.</span>
+                            </div>
+                            <!--end::Content-->
+                        </div>
+                       <div class="@(Model.Precautions!.Any()? string.Empty:"d-none" )" >
+                            @foreach (var Precaution in Model.Precautions)
+                            {
+                                <div class=" border-3 border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 ">@Precaution</div>
+                            }    
+                       </div>
                     </div>
                 </div>
                 <!--end:::Tab pane-->
