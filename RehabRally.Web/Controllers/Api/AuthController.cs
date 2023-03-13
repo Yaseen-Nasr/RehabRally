@@ -66,7 +66,7 @@ namespace RehabRally.Web.Controllers.Api
                 user.FullName,
                 user.Email,
                 user.UserName,
-                user.PhoneNumber,
+                user.MobileNumber,
                 user.Age,  
             });
         }
