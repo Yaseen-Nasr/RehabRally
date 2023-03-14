@@ -9,5 +9,6 @@ namespace RehabRally.Web.Core.AuthModels
 
         [Required]
         public string Password { get; set; }
+        
     }
 }

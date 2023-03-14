@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using RehabRally.Web.Core.AuthModels;
 using RehabRally.Web.Core.Models;
+using RehabRally.Web.Data;
 using RehabRally.Web.Helpers;
 using RehabRally.Web.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,18 +27,26 @@ namespace RehabRally.Web.Controllers.Api
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWT _jwt;
         private readonly IAuthService _authService;
+        private readonly ApplicationDbContext _context;
+        private readonly FirebaseMessaging _firebaseMessaging;
+        private readonly ILogger<AuthController> _logger;
 
         public AuthController(UserManager<ApplicationUser> userManager,
                         IOptions<JWT> jwt,
                         RoleManager<IdentityRole> roleManager,
                         IAuthService authService
-                   )
+,
+                        ApplicationDbContext context,
+                        FirebaseMessaging firebaseMessaging,
+                        ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwt = jwt.Value;
             _authService = authService;
-
+            _context = context;
+            _firebaseMessaging = firebaseMessaging;
+            _logger = logger;
         }
 
         [HttpPost("LogIn")]
@@ -43,15 +56,28 @@ namespace RehabRally.Web.Controllers.Api
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            string firebaseToken = HttpContext.Request.Headers["FirebaseToken"];
+
+            if (string.IsNullOrEmpty(firebaseToken))
+                return BadRequest("Invalid firebaseToken");
+
             var result = await _authService.GetTokenAsync(model);
 
             if (!result.IsAuthenticated)
                 return BadRequest(result.Message);
 
+            var mashine = await _context.RegisterdMashines.Where(x => x.FirebaseToken == firebaseToken).FirstOrDefaultAsync();
+            if (mashine is not null)
+                mashine.UserId = result.UserId;
+            else
+                await _context.RegisterdMashines.AddAsync(new RegisterdMashine { UserId = result.UserId, FirebaseToken = firebaseToken });
+
+            await _context.SaveChangesAsync();
+
             return Ok(result);
         }
-        
-        
+
+
         [HttpGet("userInfo")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> UserInfo()
@@ -62,13 +88,52 @@ namespace RehabRally.Web.Controllers.Api
                 return BadRequest("Some Thing went wrong");
 
             return Ok(new
-            { 
+            {
                 user.FullName,
                 user.Email,
                 user.UserName,
                 user.MobileNumber,
-                user.Age,  
+                user.Age,
             });
+        }
+
+
+        [HttpGet("TestFcm")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestFcm()
+        {
+            var message = new Message()
+            {
+                Notification = new Notification()
+                {
+                    Title = "RehabRally",
+                    Body = "Yarab",
+
+                },
+
+                Token = "AAAvqg9tfg:APA91bG3iHz0c_VF2HQAzMXIDLmWQBa-6238TFxI5-HDBeWf5m3Ye9xcQy5dlCdm7cDNhAPeB2-JvfzgLjn1aZsDNpxwEcOBQrhOfWmH",
+
+                Data = new Dictionary<string, string>
+                         {
+                             { "Title", "RehabRally" },
+                             { "Body", "Yarab" },
+                             { "Type", "Task" },
+                          }
+            };
+
+            var result = await _firebaseMessaging.SendAsync(message);
+            if (result != null)
+            {
+
+                _logger.LogInformation($"Push notification sent to token ");
+                return Ok();
+            }
+            else
+            {
+                _logger.LogError($"Failed to send push notification to token ");
+                return StatusCode(500);
+            }
+
         }
 
     }

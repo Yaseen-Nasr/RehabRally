@@ -1,3 +1,6 @@
+using FirebaseAdmin;
+using FirebaseAdmin.Messaging;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -46,6 +49,24 @@ builder.Services.AddAuthentication(options =>
                     };
                 });
 builder.Services.AddAuthorization();
+
+// Read the Firebase service account credentials from a JSON file
+var path = Path.Combine(builder.Environment.ContentRootPath, "GoogleCredential.json");
+var credentials = GoogleCredential.FromFile(path);
+
+// Add FirebaseApp instance to the service collection
+var firebaseApp = FirebaseApp.Create(new AppOptions
+{
+    Credential = credentials
+});
+
+builder.Services.AddSingleton(firebaseApp);
+builder.Services.AddSingleton<FirebaseMessaging>(serviceProvider =>
+{
+    var app = serviceProvider.GetService<FirebaseApp>();
+    return FirebaseMessaging.GetMessaging(app);
+});
+
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

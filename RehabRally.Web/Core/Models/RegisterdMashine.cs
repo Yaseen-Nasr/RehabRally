@@ -5,5 +5,7 @@
         public int Id { get; set; }
         public string FirebaseToken { get; set; } = null!;
         public string UserId { get; set; } = null!;
+         
+
     }
 }

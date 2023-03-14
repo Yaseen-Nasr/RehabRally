@@ -106,8 +106,7 @@ namespace RehabRally.Web.Controllers.Api
             if (patientExercise.IsDone)
                 return Ok("You have already Finished it");
             patientExercise.SetsDoneCount += 1;
-            patientExercise.IsDone = patientExercise.SetsDoneCount == patientExercise.Sets;
-            _context.Update(patientExercise);
+            patientExercise.IsDone = patientExercise.SetsDoneCount == patientExercise.Sets; 
             await _context.SaveChangesAsync();
 
             return Ok("Great jop, Keep The work up!!");
