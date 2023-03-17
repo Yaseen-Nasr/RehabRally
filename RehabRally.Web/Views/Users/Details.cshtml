@@ -27,10 +27,14 @@
     </div>
     <div>
         @*ToDo::Make IT anotify Button*@
-        <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@Model.Id">
-            <i class="bi bi-plus-square-dotted"></i>
-            Notify
-        </a>
+        <div class="card-toolbar">
+            <a href="javascript:;" class="btn btn-sm btn-primary js-render-modal"
+               data-title="Notify Patient" data-url="/Users/Reminder?id=@Model.Id">
+                <i class="bi bi-plus-square-dotted"></i>
+                Notify
+            </a>
+
+        </div>
     </div>
 </div>
 
@@ -252,7 +256,7 @@
                             <div class="mb-5">
                                 <div class="form-floating mb-2">
                                     <input type="text" class="form-control form-control-solid" placeholder="Precaution" asp-for="Conclusion" />
-                                 </div>
+                                </div>
                                 <span asp-validation-for="Conclusion" class="text-danger d-block"></span>
                             </div>
                         </form>
@@ -277,7 +281,7 @@
                     <div class="card-header border-0">
                         <!--begin::Card title-->
                         <div class="card-title">
-                            Precautions 
+                            Precautions
                         </div>
                         <!--end::Card title-->
                     </div>
@@ -302,12 +306,12 @@
                             </div>
                             <!--end::Content-->
                         </div>
-                       <div class="@(Model.Precautions!.Any()? string.Empty:"d-none" )" >
+                        <div class="@(Model.Precautions!.Any()? string.Empty:"d-none" )">
                             @foreach (var Precaution in Model.Precautions)
                             {
                                 <div class=" border-3 border-dashed d-flex flex-column flex-sm-row w-100 p-5 mb-10 ">@Precaution</div>
-                            }    
-                       </div>
+                            }
+                        </div>
                     </div>
                 </div>
                 <!--end:::Tab pane-->
@@ -316,15 +320,16 @@
         </div>
         <!--end::Content-->
     </div>
+</div>
 
-    @section Plugins
-        {
-        <script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
+@section Plugins
+    {
+    <script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
 
     }
-    @section Scripts
-        {
+@section Scripts
+    {
 
-        <partial name="_ValidationScriptsPartial" />
-        <script src="~/js/exercises-details.js" asp-append-version="true"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/exercises-details.js" asp-append-version="true"></script>
     }

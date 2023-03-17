@@ -111,7 +111,7 @@ namespace RehabRally.Web.Controllers.Api
 
                 },
 
-                Token = "AAAvqg9tfg:APA91bG3iHz0c_VF2HQAzMXIDLmWQBa-6238TFxI5-HDBeWf5m3Ye9xcQy5dlCdm7cDNhAPeB2-JvfzgLjn1aZsDNpxwEcOBQrhOfWmH",
+                Token = "ehM0pAY_RDS0IKL1-XILCf:APA91bG5FRknTOQe4WrdHmqbZiKf2Evx0OoKx2n4a56RRvuDbcSNhVSViKPWAQCrvQFqX6ZYPUI25SizWt0ktZ8ViYDvBytacUXoFxy69lfMVylNR7xBFm63aapjXt0FlDkIRQHVrJma",
 
                 Data = new Dictionary<string, string>
                          {
@@ -126,7 +126,7 @@ namespace RehabRally.Web.Controllers.Api
             {
 
                 _logger.LogInformation($"Push notification sent to token ");
-                return Ok();
+                return Ok(result);
             }
             else
             {

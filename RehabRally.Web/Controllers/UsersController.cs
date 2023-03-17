@@ -15,6 +15,8 @@ using RehabRally.Web.Core.Consts;
 using System.Data;
 using RehabRally.Web.Core.ViewModels;
 using RehabRally.Web.Data;
+using RehabRally.Web.Helpers;
+using System;
 
 namespace RehabRally.Web.Controllers
 {
@@ -111,6 +113,28 @@ namespace RehabRally.Web.Controllers
             }
 
             return BadRequest(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+        [HttpGet]
+        [AjaxOnly]
+        public async Task<IActionResult> Reminder(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+           
+            if (user is null)
+                return NotFound();
+
+            var viewModel = new UserReminderViewModel()
+            {
+                UserId = user.Id,
+                NotificationTypeList = Enum.GetValues(typeof(FcmNotificationType)).Cast<FcmNotificationType>().Select(v => new SelectListItem
+                {
+                    Text = v.ToString(),
+                    Value = ((int)v).ToString()
+                }).ToList()
+            };
+
+
+            return PartialView("_Reminder", viewModel);
         }
         [HttpGet]
         [AjaxOnly]
