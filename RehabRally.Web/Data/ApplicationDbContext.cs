@@ -16,6 +16,7 @@ namespace RehabRally.Web.Data
 		public DbSet<PatientExercise> PatientExercises { get; set; }
 		public DbSet<RegisterdMashine> RegisterdMashines { get; set; }
 		public DbSet<PatientConclusion> PatientConclusions { get; set; }
+		public DbSet<SystemNotification> SystemNotifications { get; set; }
 
 	}
 }

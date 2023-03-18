@@ -17,6 +17,10 @@ using RehabRally.Web.Core.ViewModels;
 using RehabRally.Web.Data;
 using RehabRally.Web.Helpers;
 using System;
+using FirebaseAdmin.Messaging;
+using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
+using FirebaseAdmin.Auth;
 
 namespace RehabRally.Web.Controllers
 {
@@ -27,6 +31,7 @@ namespace RehabRally.Web.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly FirebaseMessaging _firebaseMessaging;
 
         public UsersController(
             UserManager<ApplicationUser> userManager,
@@ -34,12 +39,14 @@ namespace RehabRally.Web.Controllers
             IMapper mapper
 ,
             ApplicationDbContext context
-            )
+,
+            FirebaseMessaging firebaseMessaging)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
             _context = context;
+            _firebaseMessaging = firebaseMessaging;
         }
 
         public async Task<IActionResult> Index()
@@ -119,7 +126,7 @@ namespace RehabRally.Web.Controllers
         public async Task<IActionResult> Reminder(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-           
+
             if (user is null)
                 return NotFound();
 
@@ -136,6 +143,59 @@ namespace RehabRally.Web.Controllers
 
             return PartialView("_Reminder", viewModel);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reminder(UserReminderViewModel viewModel)
+        {
+
+
+            var fireBaseTokens = await _context.RegisterdMashines.Where(r => r.UserId == viewModel.UserId)
+                                                                .Select(r => r.FirebaseToken).ToListAsync();
+            if (!fireBaseTokens.Any())
+                return NotFound("The Current User Dose Not login ");
+            foreach (var token in fireBaseTokens)
+            {
+                var message = new Message()
+                {
+                    Notification = new Notification()
+                    {
+                        Title = "RehabRally",
+                        Body = ((FcmNotificationType)viewModel.NotificationType).ToString(),
+                    },
+
+                    Token = token,
+
+                    Data = new Dictionary<string, string>
+                         {
+                             { "Title", "RehabRally" },
+                             { "Body", ((FcmNotificationType)viewModel.NotificationType).ToString()},
+                             { "Type", viewModel.NotificationType.ToString() },
+                          }
+                };
+                try
+                {
+                    var result = await _firebaseMessaging.SendAsync(message); 
+                }
+                catch (Exception)
+                {
+
+                    throw new Exception("This usert Is not Register");
+                }
+
+            }
+            await _context.AddAsync(new SystemNotification
+            {
+                UserId= viewModel.UserId,
+                NotificationType= (FcmNotificationType)viewModel.NotificationType,
+                
+            });
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+
+
         [HttpGet]
         [AjaxOnly]
         public async Task<IActionResult> ResetPassword(string id)

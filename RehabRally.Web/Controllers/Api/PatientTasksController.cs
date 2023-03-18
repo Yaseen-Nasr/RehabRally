@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using RehabRally.Web.Core.Dtos;
 using RehabRally.Web.Core.Models;
 using RehabRally.Web.Data;
+using RehabRally.Web.Helpers;
 using System.Reflection;
 using System.Security.Claims;
 
@@ -124,6 +125,32 @@ namespace RehabRally.Web.Controllers.Api
                                                         .ToListAsync();
 
                 return Ok(precautions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Some Thing Went Wrong {ex.Message} ");
+                throw;
+            }
+
+        }
+        [HttpGet("getSystemNotifications")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> SystemNotifications()
+        {
+            try
+            {
+                var userId = User.FindFirstValue("uid");
+                List<SystemNotificationDto> Notifications = await _context.SystemNotifications
+                                                        .Where(x => x.UserId == userId)
+                                                        .Select(e => new SystemNotificationDto
+                                                        {
+                                                            Title="RehabRally",
+                                                            Type=e.NotificationType,
+                                                            Body= (e.NotificationType).ToString() 
+                                                        })
+                                                        .ToListAsync();
+
+                return Ok(Notifications);
             }
             catch (Exception ex)
             {
