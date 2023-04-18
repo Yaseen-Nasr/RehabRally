@@ -1,5 +1,10 @@
 #RehabRally
-RehabRally is a physiotherapy clinic management application built using .NET Core. The application consists of a dashboard that allows doctors to manage categories and exercises and assign them to patients.Doctor Can Create patient Account And manage Resete Password or edit profile info, The patient can then log in to a mobile app that interacts with APIs built for the application to manage their assigned exercises and see their daily progress.
+
+RehabRally is a physiotherapy clinic management application built using .NET Core.
+ The application consists of a dashboard that allows doctors to manage categories and exercises and assign them to patients.
+Doctor Can Create patient Account And manage Resete Password or edit profile info,
+ The patient can then log in to a mobile app that interacts with APIs built for the application to manage their assigned exercises and see their daily progress.
+
 #Architecture
 RehabRally follows the clean architecture principles, which separates the presentation layer from the domain layer and database access layer. The solution is structured into the following projects:
 
