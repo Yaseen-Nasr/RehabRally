@@ -1,4 +1,4 @@
-﻿using RehabRally.Web.Core.Consts;
+﻿using RehabRally.Core.Consts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 

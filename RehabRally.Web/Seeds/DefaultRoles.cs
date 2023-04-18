@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using RehabRally.Web.Core.Consts;
+using RehabRally.Core.Consts;
 
 namespace RehabRally.Web.Seeds
 {

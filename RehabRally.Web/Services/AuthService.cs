@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RehabRally.Web.Core.AuthModels;
-using RehabRally.Web.Core.Models;
+using RehabRally.Core.Models;
 using RehabRally.Web.Helpers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

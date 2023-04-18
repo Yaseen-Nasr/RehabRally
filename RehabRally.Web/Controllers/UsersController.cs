@@ -1,26 +1,11 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity; 
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.WebUtilities;
-using RehabRally.Web.Core.Models;
-using RehabRally.Web.Filters;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using RehabRally.Web.Core.Consts;
+using RehabRally.Core.Models; 
 using System.Data;
-using RehabRally.Web.Core.ViewModels;
-using RehabRally.Web.Data;
-using RehabRally.Web.Helpers;
-using System;
-using FirebaseAdmin.Messaging;
-using Newtonsoft.Json.Linq;
-using System.Xml.Linq;
-using FirebaseAdmin.Auth;
+using RehabRally.Core.ViewModels; 
+using FirebaseAdmin.Messaging; 
+ using RehabRally.Ef.Data;
+using RehabRally.Core.Abstractions;
 
 namespace RehabRally.Web.Controllers
 {
@@ -28,25 +13,23 @@ namespace RehabRally.Web.Controllers
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ApplicationDbContext _context;
+        private readonly RoleManager<IdentityRole> _roleManager; 
+        private readonly IUnitOfWork _unitOfWork;  
         private readonly IMapper _mapper;
         private readonly FirebaseMessaging _firebaseMessaging;
 
         public UsersController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IMapper mapper
-,
-            ApplicationDbContext context
-,
-            FirebaseMessaging firebaseMessaging)
+            IMapper mapper , 
+            FirebaseMessaging firebaseMessaging, 
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
-            _context = context;
-            _firebaseMessaging = firebaseMessaging;
+             _firebaseMessaging = firebaseMessaging; 
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IActionResult> Index()
@@ -150,8 +133,8 @@ namespace RehabRally.Web.Controllers
         {
 
 
-            var fireBaseTokens = await _context.RegisterdMashines.Where(r => r.UserId == viewModel.UserId)
-                                                                .Select(r => r.FirebaseToken).ToListAsync();
+            var fireBaseTokens = await _unitOfWork.RegisterdMashines.GetQueryable(r => r.UserId == viewModel.UserId) 
+                                                                    .Select(r => r.FirebaseToken).ToListAsync();
             if (!fireBaseTokens.Any())
                 return NotFound("The Current User Dose Not login ");
             foreach (var token in fireBaseTokens)
@@ -175,7 +158,7 @@ namespace RehabRally.Web.Controllers
                 };
                 try
                 {
-                    var result = await _firebaseMessaging.SendAsync(message); 
+                    var result = await _firebaseMessaging.SendAsync(message);
                 }
                 catch (Exception)
                 {
@@ -184,13 +167,13 @@ namespace RehabRally.Web.Controllers
                 }
 
             }
-            await _context.AddAsync(new SystemNotification
+            await _unitOfWork.SystemNotifications.Add(new SystemNotification
             {
-                UserId= viewModel.UserId,
-                NotificationType= (FcmNotificationType)viewModel.NotificationType,
-                
+                UserId = viewModel.UserId,
+                NotificationType = (FcmNotificationType)viewModel.NotificationType,
+
             });
-            await _context.SaveChangesAsync();
+              _unitOfWork.Complete();
             return Ok();
         }
 
@@ -245,11 +228,11 @@ namespace RehabRally.Web.Controllers
                 return BadRequest();
             var viewModel = _mapper.Map<UserViewModel>(user);
             viewModel.AssignExercise = new AssignExerciseFormViewModel();
-            var categories = _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToList();
+            var categories =await _unitOfWork.Categories.GetQueryable(a => !a.IsDeleted).OrderBy(a => a.Name).ToListAsync();
 
             viewModel.AssignExercise.UserId = user.Id;
             viewModel.AssignExercise.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories);
-            viewModel.PatientExercises = _context.PatientExercises.Include(pa => pa.Exercise).Where(a => a.UserId == user.Id)
+            viewModel.PatientExercises = await _unitOfWork.PatientExercises.GetQueryable(a => a.UserId == user.Id, new string[] { nameof(Exercise) })
                                                        .Select(e => new PatientExerciseViewModel()
                                                        {
                                                            Exercise = e.Exercise!.Title,
@@ -258,8 +241,8 @@ namespace RehabRally.Web.Controllers
                                                            Sets = e.Sets,
                                                            CreatedOn = e.CreatedOn,
                                                            SetsDoneCount = e.SetsDoneCount,
-                                                       }).ToList();
-            viewModel.Precautions = _context.PatientConclusions.Where(p => p.UserId == user.Id).Select(p => p.Conclusion).ToList();
+                                                       }).ToListAsync();
+            viewModel.Precautions = await _unitOfWork.PatientConclusions.GetQueryable(p => p.UserId == user.Id).Select(p => p.Conclusion).ToListAsync();
             return View(viewModel);
         }
 
@@ -272,8 +255,8 @@ namespace RehabRally.Web.Controllers
 
             if (user is null)
                 return NotFound();
-            await _context.AddAsync(new PatientConclusion { UserId = userId, Conclusion = conclusion });
-            await _context.SaveChangesAsync();
+            await _unitOfWork.PatientConclusions.Add(new PatientConclusion { UserId = userId, Conclusion = conclusion });
+              _unitOfWork.Complete();
             return RedirectToAction("Details", new { id = user.Id });
         }
         [HttpPost]
@@ -301,7 +284,7 @@ namespace RehabRally.Web.Controllers
             {
                 UserId = userId,
             };
-            viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(await _context.Categories.ToListAsync());
+            viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(await _unitOfWork.Categories.GetQueryable().ToListAsync());
 
             return PartialView("_AssignTask", viewModel);
         }
@@ -313,10 +296,9 @@ namespace RehabRally.Web.Controllers
                 return BadRequest();
 
             var patientExercise = _mapper.Map<PatientExercise>(viewModel);
-            await _context.PatientExercises.AddAsync(patientExercise);
-            await _context.SaveChangesAsync();
-            //ToDo:: Return viweModel And Attach it with OverView for patient details
-            var patientExerciseVM = new PatientExerciseViewModel()
+            await _unitOfWork.PatientExercises.Add(patientExercise);
+            _unitOfWork.Complete();
+             var patientExerciseVM = new PatientExerciseViewModel()
             {
                 CreatedOn = patientExercise.CreatedOn,
                 IsDone = false,
@@ -324,14 +306,15 @@ namespace RehabRally.Web.Controllers
                 Sets = patientExercise.Sets,
                 SetsDoneCount = patientExercise.SetsDoneCount
             };
-            patientExerciseVM.Exercise = await _context.Exercises.Where(s => s.Id == patientExercise.ExerciseId).Select(s => s.Title).SingleOrDefaultAsync() ?? "";
+            patientExerciseVM.Exercise = await _unitOfWork.Exercises.GetQueryable(s => s.Id == patientExercise.ExerciseId)
+                                                                .Select(s => s.Title).SingleOrDefaultAsync() ?? "";
             return PartialView("_PatientExerciseRow", patientExerciseVM);
         }
 
 
         public async Task<IActionResult> GetCategoryExercises(int categoryId)
         {
-            var exercises = await _context.Exercises.Where(a => a.CategoryId == categoryId).OrderBy(a => a.Title).ToListAsync();
+            var exercises = await _unitOfWork.Exercises.GetQueryable(a => a.CategoryId == categoryId).OrderBy(a => a.Title).ToListAsync();
 
             var selectedexercises = _mapper.Map<IEnumerable<SelectListItem>>(exercises);
             return Ok(selectedexercises);

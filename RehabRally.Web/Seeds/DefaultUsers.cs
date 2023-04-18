@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using RehabRally.Web.Core.Consts;
-using RehabRally.Web.Core.Models;
+using RehabRally.Core.Consts;
+using RehabRally.Core.Models;
 
 namespace RehabRally.Web.Seeds
 {

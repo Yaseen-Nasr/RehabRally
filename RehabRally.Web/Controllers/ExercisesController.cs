@@ -4,15 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using RehabRally.Web.Core.Consts;
-using RehabRally.Web.Core.Models;
-using RehabRally.Web.Core.ViewModels;
-using RehabRally.Web.Data;
-using RehabRally.Web.Filters;
-using RehabRally.Web.Services;
+using RehabRally.Core.Consts;
+using RehabRally.Core.Models;
+ 
 using System.Data;
 using System.Linq.Dynamic.Core;
-using System.Security.Principal;
+using RehabRally.Core.ViewModels;
+using RehabRally.Ef.Data;
+using RehabRally.Core.Abstractions;
 
 namespace RehabRally.Web.Controllers
 {
@@ -20,30 +19,19 @@ namespace RehabRally.Web.Controllers
     public class ExercisesController : Controller
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        //private readonly Cloudinary _cloudinary;
-        private readonly IImageService _IImageService;
+         private readonly IImageService _IImageService;
 
-
-        //IOptions interface to bind data from appsettings to Class service
-        public ExercisesController(ApplicationDbContext context, IMapper mapper,
+        public ExercisesController(  IMapper mapper,
             IWebHostEnvironment webHostEnvironment,
-              IImageService iImageService)
-        //IOptions<CloudinarySettings> cloudinary
+              IImageService iImageService, IUnitOfWork unitOfWork)
 
         {
-            _context = context;
-            _mapper = mapper;
+             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
-            //Account account = new()
-            //{
-            //    ApiKey = cloudinary.Value.APiKey,
-            //    ApiSecret = cloudinary.Value.APiSecret,
-            //    Cloud = cloudinary.Value.Cloud
-            //};
-            //_cloudinary = new Cloudinary(account);
             _IImageService = iImageService;
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
@@ -63,8 +51,7 @@ namespace RehabRally.Web.Controllers
             var searchValue = Request.Form["search[value]"];
 
 
-            IQueryable<Exercise> exercises = _context.Exercises
-                .Include(b => b.Category);
+            IQueryable<Exercise> exercises = _unitOfWork.Exercises.GetQueryable(new string[] { nameof(Category) });
 
             if (!string.IsNullOrEmpty(searchValue))
                 exercises = exercises.Where(b => b.Title.Contains(searchValue) || b.Category!.Name.Contains(searchValue));
@@ -111,15 +98,15 @@ namespace RehabRally.Web.Controllers
             }
 
 
-            await _context.AddAsync(exercise);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Exercises.Add(exercise);
+            _unitOfWork.Complete();
 
             return RedirectToAction(nameof(Details), new { id = exercise.Id });
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var Exercise = await _context.Exercises.SingleOrDefaultAsync(b => b.Id == id);
+            var Exercise =  await _unitOfWork.Exercises.Find(b => b.Id == id);
 
             if (Exercise is null)
                 return NotFound();
@@ -137,7 +124,7 @@ namespace RehabRally.Web.Controllers
             if (!ModelState.IsValid)
                 return View("Form", PopulateViewModel(model));
 
-            var exercise = await _context.Exercises.SingleOrDefaultAsync(b => b.Id == model.Id);
+            var exercise = await _unitOfWork.Exercises.Find(b => b.Id == model.Id);
             //string imagePublicId = null;
             if (exercise is null)
                 return NotFound();
@@ -159,20 +146,9 @@ namespace RehabRally.Web.Controllers
 
                 }
                 model.ImageUrl = $"{UploadedFiles.ExercisesImages}{imageName}";
-                model.ImageThumbnailUrl = $"{UploadedFiles.ExercisesImagesThumnail}{imageName}";
-                //call cloudaniry service
-                //  using var stream = model.Image.OpenReadStream();
-                //  var imageParams = new ImageUploadParams()
-                //  {
-                //      File = new FileDescription(imageName, stream),
-                //      UseFilename = true
-                //  };
-                //  var result = await _cloudinary.UploadAsync(imageParams);
-                //  book.ImageUrl = result.SecureUrl.ToString();
-                //imagePublicId = result.PublicId;
+                model.ImageThumbnailUrl = $"{UploadedFiles.ExercisesImagesThumnail}{imageName}"; 
             }
-            //if user does not edit  image get the old image url
-            else if (!string.IsNullOrEmpty(exercise.ImageUrl))
+             else if (!string.IsNullOrEmpty(exercise.ImageUrl))
             {
                 model.ImageUrl = exercise.ImageUrl;
                 model.ImageThumbnailUrl = exercise.ImageThumbnailUrl;
@@ -180,7 +156,7 @@ namespace RehabRally.Web.Controllers
 
             exercise = _mapper.Map(model, exercise);
             exercise.LastUpdatedOn = DateTime.Now;
-            await _context.SaveChangesAsync();
+            _unitOfWork.Complete();
 
             return RedirectToAction(nameof(Details), new { id = exercise.Id });
         }
@@ -189,20 +165,19 @@ namespace RehabRally.Web.Controllers
         public async Task<IActionResult> ToggleStatus(int id)
         {
 
-            var exercise = await _context.Exercises.FindAsync(id);
+            var exercise = await _unitOfWork.Exercises.GetByIdAsync(id);
 
             if (exercise is null)
                 return NotFound();
             exercise.IsDeleted = !exercise.IsDeleted;
             exercise.LastUpdatedOn = DateTime.Now;
-            await _context.SaveChangesAsync();
+            _unitOfWork.Complete();
             return Ok();
         }
         public async Task<IActionResult> Details(int id)
         {
-            var exercise = await _context.Exercises
-                .Include(a => a.Category)
-                .SingleOrDefaultAsync(b => b.Id == id);
+            var exercise = await _unitOfWork.Exercises
+                .Find(b => b.Id == id, new string[] { nameof(Category) });
             if (exercise is null)
                 return NotFound();
             var viewModel = _mapper.Map<ExerciseViewModel>(exercise);
@@ -213,28 +188,18 @@ namespace RehabRally.Web.Controllers
 
         public async Task<IActionResult> AllowItem(ExerciseFormViewModel model)
         {
-            var exerise =await _context.Exercises.SingleOrDefaultAsync(b => b.Title == model.Title && b.CategoryId == model.CategoryId);
+            var exerise = await _unitOfWork.Exercises.Find(b => b.Title == model.Title && b.CategoryId == model.CategoryId);
             var isAllowed = exerise is null || exerise.Id.Equals(model.Id);
             return Json(isAllowed);
         }
         private async Task<ExerciseFormViewModel> PopulateViewModel(ExerciseFormViewModel? model = null)
         {
             ExerciseFormViewModel viewModel = model is null ? new ExerciseFormViewModel() : model;
-            var categories = await _context.Categories.Where(a => !a.IsDeleted).OrderBy(a => a.Name).ToListAsync();
+            var categories = await _unitOfWork.Categories.FindAllAsync(a => !a.IsDeleted,null,null,orderBy: a => a.Name);
             viewModel.Categories = _mapper.Map<IEnumerable<SelectListItem>>(categories);
             return viewModel;
         }
-        ////Get image Thumbnail Url
-        //private string GetThumbnailUrl(string url)
-        //{
-        //    //c_thumb,w_200,g_face/
-        //    //https://res.cloudinary.com/bookifycloudinary/image/upload/cv1667843217/29e33d3b-93ad-4419-bb4f-375810c412d4_zkae7y.jpg
-        //    string separator = "image/upload/";
-        //    var urlParts = url.Split(separator);
-        //    var thumbnailUrl = $"{urlParts[0]}{separator}c_thumb,w_200,g_face/{urlParts[1]}";
-        //    return thumbnailUrl;
-
-        //}
+         
     }
 }
 

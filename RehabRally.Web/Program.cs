@@ -4,15 +4,19 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RehabRally.Web.Core.Mapping;
-using RehabRally.Web.Core.Models;
-using RehabRally.Web.Data;
-using RehabRally.Web.Helpers;
+using RehabRally.Core.Mapping;
+using RehabRally.Core.Models;
+using RehabRally.Core.Helpers;
 using RehabRally.Web.Seeds;
 using RehabRally.Web.Services;
 using System.Reflection;
 using System.Text;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
+using RehabRally.Ef.Data;
+using RehabRally.Web.Helpers;
+using RehabRally.Core.Abstractions;
+using RehabRally.EF.Respositories;
+using RehabRally.EF;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +32,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.S
 //Add Custom Claimes Config As ClaimTypes.GivenName
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
+builder.Services.AddTransient(typeof(IBaseRespository<>), typeof(BaseRespository<>));
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddCors();
 builder.Services.AddAuthentication(options =>
 {
@@ -74,21 +80,21 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 builder.Services.AddControllersWithViews();
- 
-builder.Services.AddTransient<IImageService, ImageService>(); 
-builder.Services.AddScoped<IAuthService, AuthService>(); 
+
+builder.Services.AddTransient<IImageService, ImageService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
 builder.Services.AddExpressiveAnnotations();
 
- var app = builder.Build();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseMigrationsEndPoint();
+    app.UseMigrationsEndPoint();
 }
 else
-{  
+{
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
@@ -110,8 +116,8 @@ var userManger = scope.ServiceProvider.GetRequiredService<UserManager<Applicatio
 await DefaultRoles.SeedRolesAsync(roleManger);
 await DefaultUsers.SeedAdminUserAsync(userManger);
 app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 app.Run();

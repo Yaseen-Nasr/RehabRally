@@ -4,12 +4,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RehabRally.Web.Core.Dtos;
-using RehabRally.Web.Core.Models;
-using RehabRally.Web.Data;
-using RehabRally.Web.Helpers;
+using RehabRally.Core.Models;
+using RehabRally.Core.Dtos;
+
+
+using RehabRally.Core.Helpers;
 using System.Reflection;
 using System.Security.Claims;
+using RehabRally.Ef.Data;
+using RehabRally.Core.Abstractions;
 
 namespace RehabRally.Web.Controllers.Api
 {
@@ -18,13 +21,14 @@ namespace RehabRally.Web.Controllers.Api
     public class PatientTasksController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public PatientTasksController(UserManager<ApplicationUser> userManager, IMapper mapper, ApplicationDbContext context)
+
+        public PatientTasksController(UserManager<ApplicationUser> userManager, IMapper mapper , IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _mapper = mapper;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
         [HttpGet("getMyTasks")]
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -33,17 +37,15 @@ namespace RehabRally.Web.Controllers.Api
             try
             {
                 var userId = User.FindFirstValue("uid");
-                var exercises = await _context.PatientExercises
-                                                        .Where(x => x.UserId == userId)
-                                                        .Include(x => x.Exercise)
+                var exercises = await _unitOfWork.PatientExercises
+                                                        .GetQueryable(x => x.UserId == userId,new string[] { nameof(Exercise) }) 
                                                         .Select(e => new
                                                         {
                                                             e.Id,
                                                             e.Exercise!.Title,
                                                             e.Sets,
                                                             e.Repetions,
-                                                            e.IsDone
-
+                                                            e.IsDone 
                                                         })
                                                         .ToListAsync();
 
@@ -65,9 +67,8 @@ namespace RehabRally.Web.Controllers.Api
             if (userId is null)
                 return BadRequest();
 
-            var taskDetails = await _context.PatientExercises
-                                    .Where(x => x.Id == taskId && x.UserId == userId)
-                                   .Include(x => x.Exercise)
+            var taskDetails = await _unitOfWork.PatientExercises
+                                    .GetQueryable(x => x.Id == taskId && x.UserId == userId, new string[] { nameof(Exercise) }) 
                                     .Select(x => new TaskDetailsDto
                                     {
                                         TaskId = x.Id,
@@ -81,7 +82,7 @@ namespace RehabRally.Web.Controllers.Api
             if (taskDetails is null)
                 return NotFound("there's no task!!");
 
-            var exercise = await _context.Exercises.FindAsync(taskDetails!.ExerciseId);
+            var exercise = await _unitOfWork.Exercises.GetByIdAsync(taskDetails!.ExerciseId);
             if (exercise is null)
                 return NotFound("some thing went wrong!!");
 
@@ -99,16 +100,17 @@ namespace RehabRally.Web.Controllers.Api
             if (userId is null)
                 return BadRequest();
 
-            var patientExercise = await _context.PatientExercises
-                                    .Where(x => x.Id == taskId && x.UserId == userId).FirstOrDefaultAsync();
+            var patientExercise = await _unitOfWork.PatientExercises 
+                                        .GetQueryable(x => x.Id == taskId && x.UserId == userId)
+                                        .FirstOrDefaultAsync();
             if (patientExercise is null)
                 return NotFound("there's no task!!");
 
             if (patientExercise.IsDone)
                 return Ok("You have already Finished it");
             patientExercise.SetsDoneCount += 1;
-            patientExercise.IsDone = patientExercise.SetsDoneCount == patientExercise.Sets; 
-            await _context.SaveChangesAsync();
+            patientExercise.IsDone = patientExercise.SetsDoneCount == patientExercise.Sets;
+              _unitOfWork.Complete();
 
             return Ok("Great jop, Keep The work up!!");
         }
@@ -119,8 +121,8 @@ namespace RehabRally.Web.Controllers.Api
             try
             {
                 var userId = User.FindFirstValue("uid");
-                List<string> precautions = await _context.PatientConclusions
-                                                        .Where(x => x.UserId == userId)
+                List<string> precautions = await _unitOfWork.PatientConclusions
+                                                        .GetQueryable(x => x.UserId == userId)
                                                         .Select(e => e.Conclusion)
                                                         .ToListAsync();
 
@@ -140,16 +142,24 @@ namespace RehabRally.Web.Controllers.Api
             try
             {
                 var userId = User.FindFirstValue("uid");
-                List<SystemNotificationDto> Notifications = await _context.SystemNotifications
-                                                        .Where(x => x.UserId == userId)
+                List<SystemNotificationDto> Notifications = await _unitOfWork.SystemNotifications
+                                                        .GetQueryable(x => x.UserId == userId)
                                                         .Select(e => new SystemNotificationDto
                                                         {
-                                                            Title="RehabRally",
-                                                            Type=e.NotificationType,
-                                                            Body= (e.NotificationType).ToString() 
+                                                            Title = "RehabRally",
+                                                            Type = e.NotificationType,
+
                                                         })
                                                         .ToListAsync();
-
+                foreach (var notification in Notifications)
+                {
+                    notification.Body = notification.Type switch
+                    {
+                        FcmNotificationType.Reminder => "It’s time to do the exercises",
+                        FcmNotificationType.Encourage => "Keep going",
+                        FcmNotificationType.Precaution => "New precaution",
+                    };
+                }
                 return Ok(Notifications);
             }
             catch (Exception ex)

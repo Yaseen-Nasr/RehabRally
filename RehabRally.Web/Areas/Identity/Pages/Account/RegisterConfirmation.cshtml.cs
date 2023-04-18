@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using RehabRally.Web.Core.Models;
+using RehabRally.Core.Models;
 
 namespace RehabRally.Web.Areas.Identity.Pages.Account
 {

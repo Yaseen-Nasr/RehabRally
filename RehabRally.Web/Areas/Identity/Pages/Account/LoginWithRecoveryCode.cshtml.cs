@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using RehabRally.Web.Core.Models;
+using RehabRally.Core.Models;
 namespace RehabRally.Web.Areas.Identity.Pages.Account
 {
     public class LoginWithRecoveryCodeModel : PageModel

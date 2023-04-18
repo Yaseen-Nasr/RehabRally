@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RehabRally.Web.Core.Consts;
-using RehabRally.Web.Core.Models;
-using RehabRally.Web.Core.ViewModels;
-using RehabRally.Web.Data;
+using RehabRally.Core.Abstractions;
+using RehabRally.Core.Consts;
+using RehabRally.Core.Models;
+using RehabRally.Core.ViewModels;
+using RehabRally.Ef.Data;
 using RehabRally.Web.Filters;
 using System.Data;
 using System.Security.Claims;
@@ -15,24 +16,23 @@ namespace RehabRally.Web.Controllers
     [Authorize(Roles = AppRoles.Doctor)]
     public class CategoriesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CategoriesController(ApplicationDbContext context, IMapper mapper)
+        public CategoriesController(IMapper mapper, IUnitOfWork unitOfWork)
         {
-
-            _context = context;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var categories =await _context.Categories.AsNoTracking().ToListAsync();
+            var categories = await _unitOfWork.Categories.GetAllAsync();
             var viewModels = _mapper.Map<IEnumerable<CategoryViewModel>>(categories);
 
             return View(viewModels);
         }
         [HttpGet]
-        [AjaxOnly] 
+        [AjaxOnly]
         public IActionResult Create()
         {
             return PartialView("_Form");
@@ -44,12 +44,11 @@ namespace RehabRally.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            
 
-            var category = _mapper.Map<Category>(model);  
-           await _context.AddAsync(category);
-            await _context.SaveChangesAsync();
 
+            var category = _mapper.Map<Category>(model);
+            await _unitOfWork.Categories.Add(category);
+            _unitOfWork.Complete();
             var viewModel = _mapper.Map<CategoryViewModel>(category);
 
             return PartialView("_CategoryRow", viewModel);
@@ -63,25 +62,23 @@ namespace RehabRally.Web.Controllers
         public async Task<IActionResult> ToggleStatus(int id)
         {
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
 
             if (category is null)
                 return NotFound();
-            // if true make it false and same f => t
             category.IsDeleted = !category.IsDeleted;
             category.LastUpdatedOn = DateTime.Now;
             category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-            //tracking..
-           await _context.SaveChangesAsync();
+            _unitOfWork.Complete();
             return Ok(category.LastUpdatedOn.ToString());
         }
         [HttpGet]
         [AjaxOnly]
         public async Task<IActionResult> Edit(int id)
         {
-            var category =await _context.Categories.FindAsync(id);
-            
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
             if (category is null)
                 return NotFound();
 
@@ -96,7 +93,7 @@ namespace RehabRally.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var category =await _context.Categories.FindAsync(model.Id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(model.Id);
 
             if (category is null)
                 return NotFound();
@@ -106,7 +103,7 @@ namespace RehabRally.Web.Controllers
             //category.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
 
-           await _context.SaveChangesAsync();
+            _unitOfWork.Complete();
 
             var viewModel = _mapper.Map<CategoryViewModel>(category);
 
@@ -116,10 +113,9 @@ namespace RehabRally.Web.Controllers
 
         public async Task<IActionResult> AllowItem(CategoryFormViewModel model)
         {
-            var category =await _context.Categories.SingleOrDefaultAsync(c => c.Name == model.Name);
+            var category = await _unitOfWork.Categories.Find(c => c.Name == model.Name);
             var isAllowed = category is null || category.Id.Equals(model.Id);
             return Json(isAllowed);
         }
     }
 }
- 
