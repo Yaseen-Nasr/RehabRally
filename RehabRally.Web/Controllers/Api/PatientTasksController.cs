@@ -123,7 +123,7 @@ namespace RehabRally.Web.Controllers.Api
                 var userId = User.FindFirstValue("uid");
                 List<string> precautions = await _unitOfWork.PatientConclusions
                                                         .GetQueryable(x => x.UserId == userId)
-                                                        .Select(e => e.Conclusion)
+                                                        .Select(e => e.Precaution)
                                                         .ToListAsync();
 
                 return Ok(precautions);

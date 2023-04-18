@@ -242,7 +242,7 @@ namespace RehabRally.Web.Controllers
                                                            CreatedOn = e.CreatedOn,
                                                            SetsDoneCount = e.SetsDoneCount,
                                                        }).ToListAsync();
-            viewModel.Precautions = await _unitOfWork.PatientConclusions.GetQueryable(p => p.UserId == user.Id).Select(p => p.Conclusion).ToListAsync();
+            viewModel.Precautions = await _unitOfWork.PatientConclusions.GetQueryable(p => p.UserId == user.Id).Select(p => p.Precaution).ToListAsync();
             return View(viewModel);
         }
 
@@ -255,7 +255,7 @@ namespace RehabRally.Web.Controllers
 
             if (user is null)
                 return NotFound();
-            await _unitOfWork.PatientConclusions.Add(new PatientConclusion { UserId = userId, Conclusion = conclusion });
+            await _unitOfWork.PatientConclusions.Add(new PatientConclusion { UserId = userId, Precaution = conclusion });
               _unitOfWork.Complete();
             return RedirectToAction("Details", new { id = user.Id });
         }
