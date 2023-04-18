@@ -6,6 +6,7 @@ Doctor Can Create patient Account And manage Resete Password or edit profile inf
  The patient can then log in to a mobile app that interacts with APIs built for the application to manage their assigned exercises and see their daily progress.
 
 #Architecture
+
 RehabRally follows the clean architecture principles, which separates the presentation layer from the domain layer and database access layer. The solution is structured into the following projects:
 
 `RehabRally.Web`: This is the presentation layer built using ASP.NET Core MVC. It includes controllers, views, and other presentation-related components.
