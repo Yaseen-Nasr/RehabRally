@@ -30,8 +30,10 @@ User profile page for doctors to view patient progress and exercise history
 Client and server-side validation
 
 Secure APIs using JWT
- the Unit of Work and Repository patterns
+ 
+
 #Used
+
 C#,
 ,SQL Server
 ,EF Core 
